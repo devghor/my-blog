@@ -5,7 +5,7 @@ description: "Full Stack Developer passionate about scalable web solutions"
 
 ## 👋 Hi, I'm Hafijur Rahaman
 
-**Full Stack Developer | PHP (Laravel), JavaScript (Vue.js, React, Alpine.js) | API & System Architect**
+**Full Stack Developer | PHP (Laravel), JavaScript (Vue.js, React, Alpine.js) | Golang | Nodejs | API & System Architect**
 
 📍 Dhaka, Bangladesh  
 🔗 [LinkedIn Profile](https://www.linkedin.com/in/hafijur-rahaman/)
