@@ -1,0 +1,4 @@
+baseURL='https://intellygo.com/'
+languageCode='en-us'
+title='IntellyGo'
+theme ='ananke'
