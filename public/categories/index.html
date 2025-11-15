@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categories | IntellyGo</title>
     <meta name="description" content="SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
     
     <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
@@ -28,10 +33,87 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--dark-bg);
             color: var(--text-primary);
             overflow-x: hidden;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+         
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+            font-size: 1.0625rem;
+            color: var(--text-secondary);
+        }
+        
+        article p {
+            max-width: 70ch;
+        }
+        
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        pre {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            border: none;
+            color: var(--text-primary);
+        }
+        
+        blockquote {
+            border-left: 4px solid var(--gold);
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            background: rgba(255, 215, 0, 0.05);
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+        }
+        
+        ul, ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+        
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        em {
+            color: var(--gold-light);
         }
         
          
@@ -318,31 +400,31 @@
     <div class="mt4">
       
         <div class="mb2">
-          <a href="http://localhost:1313/categories/frontend-development/" class="f5 link blue hover-dark-blue">
-            Frontend Development
+          <a href="http://localhost:59620/categories/web-development/" class="f5 link blue hover-dark-blue">
+            Web Development
           </a>
-          <span class="f6 gray ml2">(1 posts)</span>
+          <span class="f6 gray ml2">(3 posts)</span>
         </div>
       
         <div class="mb2">
-          <a href="http://localhost:1313/categories/projects/" class="f5 link blue hover-dark-blue">
-            Projects
-          </a>
-          <span class="f6 gray ml2">(4 posts)</span>
-        </div>
-      
-        <div class="mb2">
-          <a href="http://localhost:1313/categories/software-architecture/" class="f5 link blue hover-dark-blue">
+          <a href="http://localhost:59620/categories/software-architecture/" class="f5 link blue hover-dark-blue">
             Software Architecture
           </a>
           <span class="f6 gray ml2">(1 posts)</span>
         </div>
       
         <div class="mb2">
-          <a href="http://localhost:1313/categories/web-development/" class="f5 link blue hover-dark-blue">
-            Web Development
+          <a href="http://localhost:59620/categories/projects/" class="f5 link blue hover-dark-blue">
+            Projects
           </a>
-          <span class="f6 gray ml2">(1 posts)</span>
+          <span class="f6 gray ml2">(5 posts)</span>
+        </div>
+      
+        <div class="mb2">
+          <a href="http://localhost:59620/categories/frontend-development/" class="f5 link blue hover-dark-blue">
+            Frontend Development
+          </a>
+          <span class="f6 gray ml2">(0 posts)</span>
         </div>
       
     </div>

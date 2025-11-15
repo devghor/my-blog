@@ -1,0 +1,190 @@
+{{ define "main" }}
+  <article class="fade-in">
+    <!-- Article Header -->
+    <header class="ph3 ph5-l pv5 tc" style="background: linear-gradient(180deg, rgba(255, 215, 0, 0.05) 0%, transparent 100%);">
+      <div class="mw7 center">
+        <time class="f6 db mb3" style="color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500;">
+          {{ .Date.Format "January 2, 2006" }}
+        </time>
+        
+        <h1 class="f1 f-headline-l fw7 lh-title mb4" style="color: var(--text-primary); max-width: 20ch; margin-left: auto; margin-right: auto;">
+          {{ .Title }}
+        </h1>
+        
+        {{ if .Description }}
+          <p class="f3 lh-copy mb4" style="color: var(--text-secondary); max-width: 40ch; margin-left: auto; margin-right: auto; font-weight: 400;">
+            {{ .Description }}
+          </p>
+        {{ end }}
+        
+        {{ if .Params.tags }}
+          <div class="flex justify-center flex-wrap mt4">
+            {{ range .Params.tags }}
+              <span class="tag dib mr2 mb2">{{ . }}</span>
+            {{ end }}
+          </div>
+        {{ end }}
+      </div>
+    </header>
+    
+    <!-- Article Content -->
+    <div class="mw7 center ph3 ph5-l pv5">
+      <div class="article-content" style="font-size: 1.125rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ .Content }}
+      </div>
+      
+      <!-- Article Footer -->
+      <footer class="mt5 pt5" style="border-top: 1px solid rgba(255, 215, 0, 0.1);">
+        {{ if .Params.tags }}
+          <div class="mb4">
+            <h3 class="f5 fw6 mb3" style="color: var(--gold);">Tags</h3>
+            <div class="flex flex-wrap">
+              {{ range .Params.tags }}
+                <a href="/tags/{{ . | urlize }}" class="tag dib mr2 mb2">
+                  {{ . }}
+                </a>
+              {{ end }}
+            </div>
+          </div>
+        {{ end }}
+        
+        <div class="flex justify-between items-center flex-wrap">
+          <a href="/posts/" class="f6 link dim" style="color: var(--gold);">
+            ← Back to Blog
+          </a>
+          
+          <div class="f6" style="color: var(--text-secondary);">
+            {{ .ReadingTime }} min read
+          </div>
+        </div>
+      </footer>
+    </div>
+  </article>
+  
+  <style>
+    /* Article-specific styles */
+    .article-content h2 {
+      font-size: 2rem;
+      color: var(--text-primary);
+      margin-top: 3rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(255, 215, 0, 0.2);
+    }
+    
+    .article-content h3 {
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .article-content h4 {
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .article-content p {
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+    }
+    
+    .article-content ul,
+    .article-content ol {
+      margin-bottom: 1.5rem;
+      padding-left: 2rem;
+    }
+    
+    .article-content li {
+      margin-bottom: 0.75rem;
+      line-height: 1.7;
+    }
+    
+    .article-content li::marker {
+      color: var(--gold);
+    }
+    
+    .article-content a {
+      color: var(--gold);
+      text-decoration: underline;
+      text-decoration-color: rgba(255, 215, 0, 0.3);
+      text-underline-offset: 3px;
+      transition: all 0.3s ease;
+    }
+    
+    .article-content a:hover {
+      color: var(--gold-light);
+      text-decoration-color: var(--gold);
+    }
+    
+    .article-content pre {
+      margin: 2rem 0;
+      font-size: 0.9375rem;
+    }
+    
+    .article-content blockquote p {
+      margin-bottom: 0;
+    }
+    
+    .article-content img {
+      border-radius: 8px;
+      margin: 2rem 0;
+      box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);
+    }
+    
+    .article-content hr {
+      border: none;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 3rem 0;
+    }
+    
+    /* Code blocks */
+    .article-content pre code {
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    
+    /* Tables */
+    .article-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      font-size: 0.9375rem;
+    }
+    
+    .article-content th,
+    .article-content td {
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      text-align: left;
+    }
+    
+    .article-content th {
+      background: rgba(255, 215, 0, 0.1);
+      color: var(--gold);
+      font-weight: 600;
+    }
+    
+    .article-content td {
+      color: var(--text-secondary);
+    }
+    
+    /* Better readability on smaller screens */
+    @media screen and (max-width: 30em) {
+      .article-content {
+        font-size: 1rem;
+      }
+      
+      .article-content h2 {
+        font-size: 1.5rem;
+      }
+      
+      .article-content h3 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+{{ end }}
