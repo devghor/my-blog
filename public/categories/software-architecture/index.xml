@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Software Architecture on IntellyGo</title>
+    <link>http://localhost:1313/categories/software-architecture/</link>
+    <description>Recent content in Software Architecture on IntellyGo</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 01 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/software-architecture/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Microservices with Golang: When and Why</title>
+      <link>http://localhost:1313/posts/microservices-golang/</link>
+      <pubDate>Fri, 01 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/microservices-golang/</guid>
+      <description>&lt;h2 id=&#34;microservices-with-golang-when-and-why&#34;&gt;Microservices with Golang: When and Why&lt;/h2&gt;&#xA;&lt;p&gt;Microservices architecture has become increasingly popular, but it&amp;rsquo;s not always the right choice. Let&amp;rsquo;s explore when it makes sense and why Golang is an excellent choice for building microservices.&lt;/p&gt;&#xA;&lt;h3 id=&#34;when-to-choose-microservices&#34;&gt;When to Choose Microservices&lt;/h3&gt;&#xA;&lt;p&gt;Microservices are beneficial when:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Team Size&lt;/strong&gt;: Multiple teams working on different features&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Scalability&lt;/strong&gt;: Different components need independent scaling&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Technology Diversity&lt;/strong&gt;: Teams need different tech stacks&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Deployment&lt;/strong&gt;: Need independent deployment cycles&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;why-golang-for-microservices&#34;&gt;Why Golang for Microservices?&lt;/h3&gt;&#xA;&lt;p&gt;Golang offers several advantages:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

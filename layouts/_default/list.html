@@ -1,0 +1,35 @@
+{{ define "main" }}
+  <article class="pa3 pa5-ns mw8 center fade-in">
+    <h1 class="section-title mb4">
+      {{ .Title }}
+    </h1>
+    
+    <div class="mb5" style="color: var(--text-secondary);">
+      {{ .Content }}
+    </div>
+    
+    <section class="flex flex-wrap nl3 nr3">
+      {{ range .Pages }}
+        <div class="w-100 w-50-l pa3 scroll-reveal">
+          <article class="card h-100 flex flex-column">
+            <time class="f6 db mb3" style="color: var(--gold);">{{ .Date.Format "January 2, 2006" }}</time>
+            
+            <h2 class="f4 fw6 lh-title mt0 mb3">
+              <a href="{{ .Permalink }}" style="color: var(--text-primary);">
+                {{ .Title }}
+              </a>
+            </h2>
+            
+            <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+              {{ .Description }}
+            </p>
+            
+            <a href="{{ .Permalink }}" class="f6 db">
+              Read more →
+            </a>
+          </article>
+        </div>
+      {{ end }}
+    </section>
+  </article>
+{{ end }}

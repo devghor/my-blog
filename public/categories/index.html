@@ -1,115 +1,395 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    
-    <title>IntellyGo</title>
-    <meta name="viewport" content="width=device-width,minimum-scale=1">
-    <meta name="description" content="">
-    <meta name="generator" content="Hugo 0.146.5">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories | IntellyGo</title>
+    <meta name="description" content="SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast">
     
     
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
     
-      <meta name="robots" content="index, follow">
-    
-    
-
-    
-<link rel="stylesheet" href="/ananke/css/main.min.d05fb5f317fcf33b3a52936399bdf6f47dc776516e1692e412ec7d76f4a5faa2.css" >
-
-
-
-
-    
-
-
-    
-      
-
-    
-
-    
-    
-      <link href="/categories/index.xml" rel="alternate" type="application/rss+xml" title="IntellyGo" />
-      <link href="/categories/index.xml" rel="feed" type="application/rss+xml" title="IntellyGo" />
-      
-    
-
-    
-      <link rel="canonical" href="https://intellygo.com/categories/">
-    
-
-    <meta property="og:url" content="https://intellygo.com/categories/">
-  <meta property="og:site_name" content="IntellyGo">
-  <meta property="og:title" content="Categories">
-  <meta property="og:locale" content="en_us">
-  <meta property="og:type" content="website">
-
-  <meta itemprop="name" content="Categories">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Categories">
-
-      
-    
-	
-  </head><body class="ma0 avenir bg-near-white production">
-
-    
-
-  <header>
-    <div class="pb3-m pb6-l bg-black">
-      <nav class="pv3 ph3 ph4-ns" role="navigation">
-  <div class="flex-l center items-center justify-between">
-    <a href="/" class="f3 fw2 hover-white white-90 dib no-underline">
-      
-        IntellyGo
-      
-    </a>
-    <div class="flex-l items-center">
-      
-
-      
-      <div class="ananke-socials"></div>
-
-    </div>
-  </div>
-</nav>
-
-      <div class="tc-l pv3 ph3 ph4-ns">
-        <h1 class="f2 f-subheadline-l fw2 light-silver mb0 lh-title">
-          Categories
-        </h1>
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
         
-      </div>
-    </div>
-  </header>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
 
-
-    <main class="pb7" role="main">
-      
+    <main class="min-vh-100">
+        
+  <article class="pa3 pa5-ns mw7 center">
+    <h1 class="f2 fw6 lh-title mt0 mb3">
+      Categories
+    </h1>
     
-  <article class="cf pa3 pa4-m pa4-l">
-    <div class="measure-wide-l center f4 lh-copy nested-copy-line-height nested-links mid-gray">
+    
+    
+    <div class="mt4">
+      
+        <div class="mb2">
+          <a href="http://localhost:1313/categories/frontend-development/" class="f5 link blue hover-dark-blue">
+            Frontend Development
+          </a>
+          <span class="f6 gray ml2">(1 posts)</span>
+        </div>
+      
+        <div class="mb2">
+          <a href="http://localhost:1313/categories/projects/" class="f5 link blue hover-dark-blue">
+            Projects
+          </a>
+          <span class="f6 gray ml2">(4 posts)</span>
+        </div>
+      
+        <div class="mb2">
+          <a href="http://localhost:1313/categories/software-architecture/" class="f5 link blue hover-dark-blue">
+            Software Architecture
+          </a>
+          <span class="f6 gray ml2">(1 posts)</span>
+        </div>
+      
+        <div class="mb2">
+          <a href="http://localhost:1313/categories/web-development/" class="f5 link blue hover-dark-blue">
+            Web Development
+          </a>
+          <span class="f6 gray ml2">(1 posts)</span>
+        </div>
       
     </div>
   </article>
-  <div class="mw8 center">
-    <section class="ph4">
-      
-    </section>
-  </div>
 
     </main>
-    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
-  <div class="flex justify-between">
-  <a class="f4 fw4 hover-white white-70 dn dib-ns pv2 ph3 no-underline" href="https://intellygo.com/" >
-    &copy;  IntellyGo 2025 
-  </a>
-    <div><div class="ananke-socials"></div>
-</div>
-  </div>
-</footer>
 
-  </body>
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
 </html>

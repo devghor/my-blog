@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laravel High-Concurrency Applications: Performance &amp; Scalability | IntellyGo</title>
+    <meta name="description" content="Build high-performance Laravel applications that handle thousands of concurrent requests. Learn optimization techniques, caching strategies, and scaling patterns.">
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+    
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-vh-100">
+        
+  <article class="pa3 pa5-ns mw7 center fade-in">
+    <h1 class="section-title mb4">
+      Laravel High-Concurrency Applications: Performance &amp; Scalability
+    </h1>
+    
+    <div class="lh-copy f5" style="color: var(--text-secondary);">
+      <h2 id="laravel-high-concurrency-applications-performance--scalability">Laravel High-Concurrency Applications: Performance &amp; Scalability</h2>
+<p>Building applications that handle high concurrency requires careful planning and optimization. In this guide, we&rsquo;ll explore proven techniques to make your Laravel applications blazingly fast and scalable.</p>
+<hr>
+<h2 id="understanding-high-concurrency">Understanding High Concurrency</h2>
+<p>High-concurrency applications must handle:</p>
+<ul>
+<li>Thousands of simultaneous requests</li>
+<li>Real-time data processing</li>
+<li>Heavy database operations</li>
+<li>Large-scale data transfers</li>
+</ul>
+<hr>
+<h2 id="1-database-optimization">1. Database Optimization</h2>
+<h3 id="query-optimization">Query Optimization</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ N+1 Problem
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($users <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">posts</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>(); <span style="color:#75715e">// Queries for each user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Eager Loading
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;posts&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($users <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">posts</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>(); <span style="color:#75715e">// No additional queries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Load Only Required Columns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;name&#39;</span>, <span style="color:#e6db74">&#39;email&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;posts:id,user_id,title&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Chunk Large Datasets
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">chunk</span>(<span style="color:#ae81ff">1000</span>, <span style="color:#66d9ef">function</span> ($users) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">foreach</span> ($users <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Process user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="database-indexing">Database Indexing</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Migration
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Schema</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>(<span style="color:#e6db74">&#39;orders&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Blueprint</span> $table) {
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>();
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">foreignId</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>(); <span style="color:#75715e">// Index foreign keys
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">string</span>(<span style="color:#e6db74">&#39;status&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>(); <span style="color:#75715e">// Index frequently queried columns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">timestamp</span>(<span style="color:#e6db74">&#39;created_at&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>();
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Composite index for common queries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>([<span style="color:#e6db74">&#39;user_id&#39;</span>, <span style="color:#e6db74">&#39;status&#39;</span>]);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>([<span style="color:#e6db74">&#39;status&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>]);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="connection-pooling">Connection Pooling</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// config/database.php
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;mysql&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;read&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;host&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;192.168.1.1&#39;</span>, <span style="color:#75715e">// Read replica 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#e6db74">&#39;192.168.1.2&#39;</span>, <span style="color:#75715e">// Read replica 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        ],
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;write&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;host&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;192.168.1.3&#39;</span>], <span style="color:#75715e">// Master
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;sticky&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">true</span>, <span style="color:#75715e">// Read from master after write
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#e6db74">&#39;pool&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;min&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;max&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">10</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>],
+</span></span></code></pre></div><hr>
+<h2 id="2-caching-strategies">2. Caching Strategies</h2>
+<h3 id="multi-layer-caching">Multi-Layer Caching</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ProductService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getProduct</span>(<span style="color:#a6e22e">int</span> $id)<span style="color:#f92672">:</span> <span style="color:#f92672">?</span><span style="color:#a6e22e">Product</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Layer 1: Application cache (APCu/Array)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $cacheKey <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;product:</span><span style="color:#e6db74">{</span>$id<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ($cached <span style="color:#f92672">=</span> <span style="color:#a6e22e">apcu_fetch</span>($cacheKey)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">unserialize</span>($cached);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Layer 2: Redis cache
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $product <span style="color:#f92672">=</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">remember</span>($cacheKey, <span style="color:#ae81ff">3600</span>, <span style="color:#66d9ef">function</span> () <span style="color:#66d9ef">use</span> ($id) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Layer 3: Database
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Product</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>([<span style="color:#e6db74">&#39;category&#39;</span>, <span style="color:#e6db74">&#39;images&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">find</span>($id);
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Store in APCu for faster subsequent access
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">apcu_store</span>($cacheKey, <span style="color:#a6e22e">serialize</span>($product), <span style="color:#ae81ff">600</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $product;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="query-result-caching">Query Result Caching</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">OrderRepository</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getUserOrders</span>(<span style="color:#a6e22e">int</span> $userId)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Collection</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#39;users&#39;</span>, <span style="color:#e6db74">&#34;user:</span><span style="color:#e6db74">{</span>$userId<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, <span style="color:#e6db74">&#39;orders&#39;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">remember</span>(<span style="color:#e6db74">&#34;user:</span><span style="color:#e6db74">{</span>$userId<span style="color:#e6db74">}</span><span style="color:#e6db74">:orders&#34;</span>, <span style="color:#ae81ff">1800</span>, <span style="color:#66d9ef">function</span> () <span style="color:#66d9ef">use</span> ($userId) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Order</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>, $userId)
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;items.product&#39;</span>)
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">latest</span>()
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">clearUserCache</span>(<span style="color:#a6e22e">int</span> $userId)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#34;user:</span><span style="color:#e6db74">{</span>$userId<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">flush</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="cache-warming">Cache Warming</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Console Command
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">WarmCacheCommand</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Command</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">protected</span> $signature <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;cache:warm&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handle</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Warm popular products
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Product</span><span style="color:#f92672">::</span><span style="color:#a6e22e">popular</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">chunk</span>(<span style="color:#ae81ff">100</span>, <span style="color:#66d9ef">function</span> ($products) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">foreach</span> ($products <span style="color:#66d9ef">as</span> $product) {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">put</span>(
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#34;product:</span><span style="color:#e6db74">{</span>$product<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>                    $product<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">load</span>(<span style="color:#e6db74">&#39;category&#39;</span>, <span style="color:#e6db74">&#39;images&#39;</span>),
+</span></span><span style="display:flex;"><span>                    <span style="color:#ae81ff">3600</span>
+</span></span><span style="display:flex;"><span>                );
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">info</span>(<span style="color:#e6db74">&#39;Cache warmed successfully!&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="3-queue-system-for-background-processing">3. Queue System for Background Processing</h2>
+<h3 id="offload-heavy-tasks">Offload Heavy Tasks</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Job
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ProcessLargeDataset</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">ShouldQueue</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Dispatchable</span>, <span style="color:#a6e22e">InteractsWithQueue</span>, <span style="color:#a6e22e">Queueable</span>, <span style="color:#a6e22e">SerializesModels</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> $timeout <span style="color:#f92672">=</span> <span style="color:#ae81ff">300</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> $tries <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">int</span> $userId,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">array</span> $data
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handle</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Heavy processing here
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">table</span>(<span style="color:#e6db74">&#39;analytics&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">insert</span>($this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">data</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">failed</span>(<span style="color:#a6e22e">Throwable</span> $exception)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Handle failure
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">error</span>(<span style="color:#e6db74">&#39;Dataset processing failed&#39;</span>, [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;user_id&#39;</span> <span style="color:#f92672">=&gt;</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">userId</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;error&#39;</span> <span style="color:#f92672">=&gt;</span> $exception<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getMessage</span>(),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">processData</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ProcessLargeDataset</span><span style="color:#f92672">::</span><span style="color:#a6e22e">dispatch</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">auth</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>(),
+</span></span><span style="display:flex;"><span>        $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validated</span>()
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([<span style="color:#e6db74">&#39;message&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Processing started&#39;</span>]);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="batch-processing">Batch Processing</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span>$batch <span style="color:#f92672">=</span> <span style="color:#a6e22e">Bus</span><span style="color:#f92672">::</span><span style="color:#a6e22e">batch</span>([
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ProcessDataChunk</span>($chunk1),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ProcessDataChunk</span>($chunk2),
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ProcessDataChunk</span>($chunk3),
+</span></span><span style="display:flex;"><span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Batch</span> $batch) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// All jobs completed successfully
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#39;batch:&#39;</span> <span style="color:#f92672">.</span> $batch<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>, <span style="color:#e6db74">&#39;completed&#39;</span>);
+</span></span><span style="display:flex;"><span>})<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">catch</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Batch</span> $batch, <span style="color:#a6e22e">Throwable</span> $e) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// First failure detected
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>})<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">finally</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Batch</span> $batch) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Batch finished executing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>})<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">dispatch</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([<span style="color:#e6db74">&#39;batch_id&#39;</span> <span style="color:#f92672">=&gt;</span> $batch<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>]);
+</span></span></code></pre></div><hr>
+<h2 id="4-api-rate-limiting--throttling">4. API Rate Limiting &amp; Throttling</h2>
+<h3 id="custom-rate-limiter">Custom Rate Limiter</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// RouteServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">configureRateLimiting</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">RateLimiter</span><span style="color:#f92672">::</span><span style="color:#a6e22e">for</span>(<span style="color:#e6db74">&#39;api&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perMinute</span>(<span style="color:#ae81ff">60</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">by</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">?-&gt;</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">?:</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">ip</span>())
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">response</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request, <span style="color:#66d9ef">array</span> $headers) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;message&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Too many requests&#39;</span>
+</span></span><span style="display:flex;"><span>                ], <span style="color:#ae81ff">429</span>, $headers);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Premium users get higher limits
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">RateLimiter</span><span style="color:#f92672">::</span><span style="color:#a6e22e">for</span>(<span style="color:#e6db74">&#39;premium-api&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">?-&gt;</span><span style="color:#a6e22e">isPremium</span>()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perMinute</span>(<span style="color:#ae81ff">1000</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perMinute</span>(<span style="color:#ae81ff">60</span>);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Route
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Route</span><span style="color:#f92672">::</span><span style="color:#a6e22e">middleware</span>([<span style="color:#e6db74">&#39;auth:sanctum&#39;</span>, <span style="color:#e6db74">&#39;throttle:premium-api&#39;</span>])
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/data&#39;</span>, [<span style="color:#a6e22e">DataController</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#e6db74">&#39;index&#39;</span>]);
+</span></span></code></pre></div><hr>
+<h2 id="5-horizontal-scaling">5. Horizontal Scaling</h2>
+<h3 id="load-balancing-configuration">Load Balancing Configuration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-nginx" data-lang="nginx"><span style="display:flex;"><span><span style="color:#75715e"># nginx.conf
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">upstream</span> <span style="color:#e6db74">laravel_backend</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">least_conn</span>; <span style="color:#75715e"># Load balancing method
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span> 192.168.1.10:<span style="color:#ae81ff">8000</span> <span style="color:#e6db74">weight=3</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span> 192.168.1.11:<span style="color:#ae81ff">8000</span> <span style="color:#e6db74">weight=3</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span> 192.168.1.12:<span style="color:#ae81ff">8000</span> <span style="color:#e6db74">weight=2</span>;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Health checks
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#f92672">keepalive</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">server</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">listen</span> <span style="color:#ae81ff">80</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server_name</span> <span style="color:#e6db74">example.com</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">location</span> <span style="color:#e6db74">/</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_pass</span> <span style="color:#e6db74">http://laravel_backend</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">Host</span> $host;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Real-IP</span> $remote_addr;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">proxy_set_header</span> <span style="color:#e6db74">X-Forwarded-For</span> $proxy_add_x_forwarded_for;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="session-management-for-scaling">Session Management for Scaling</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// config/session.php
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;driver&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;redis&#39;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;connection&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;session&#39;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// config/database.php
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;redis&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;session&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;url&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;REDIS_SESSION_URL&#39;</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;host&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;REDIS_SESSION_HOST&#39;</span>, <span style="color:#e6db74">&#39;127.0.0.1&#39;</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;REDIS_SESSION_PASSWORD&#39;</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;port&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;REDIS_SESSION_PORT&#39;</span>, <span style="color:#ae81ff">6379</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;database&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>],
+</span></span></code></pre></div><hr>
+<h2 id="6-asset-optimization">6. Asset Optimization</h2>
+<h3 id="cdn-integration">CDN Integration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// config/filesystems.php
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;cloudfront&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;driver&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;s3&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;key&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;AWS_ACCESS_KEY_ID&#39;</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;secret&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;AWS_SECRET_ACCESS_KEY&#39;</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;region&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;AWS_DEFAULT_REGION&#39;</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;bucket&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;AWS_BUCKET&#39;</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;url&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;AWS_CLOUDFRONT_URL&#39;</span>), <span style="color:#75715e">// CDN URL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Usage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">uploadImage</span>(<span style="color:#a6e22e">UploadedFile</span> $file)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $path <span style="color:#f92672">=</span> $file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">store</span>(<span style="color:#e6db74">&#39;images&#39;</span>, <span style="color:#e6db74">&#39;cloudfront&#39;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;cloudfront&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">url</span>($path);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="image-optimization">Image Optimization</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Intervention\Image\Facades\Image</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ImageOptimizationService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">optimizeAndStore</span>(<span style="color:#a6e22e">UploadedFile</span> $file)<span style="color:#f92672">:</span> <span style="color:#66d9ef">array</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $image <span style="color:#f92672">=</span> <span style="color:#a6e22e">Image</span><span style="color:#f92672">::</span><span style="color:#a6e22e">make</span>($file);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        $versions <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;thumbnail&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;width&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">150</span>, <span style="color:#e6db74">&#39;height&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">150</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;medium&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;width&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">600</span>, <span style="color:#e6db74">&#39;height&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">600</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;large&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;width&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">1200</span>, <span style="color:#e6db74">&#39;height&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">1200</span>],
+</span></span><span style="display:flex;"><span>        ];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $paths <span style="color:#f92672">=</span> [];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">foreach</span> ($versions <span style="color:#66d9ef">as</span> $size <span style="color:#f92672">=&gt;</span> $dimensions) {
+</span></span><span style="display:flex;"><span>            $resized <span style="color:#f92672">=</span> $image<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">fit</span>($dimensions[<span style="color:#e6db74">&#39;width&#39;</span>], $dimensions[<span style="color:#e6db74">&#39;height&#39;</span>]);
+</span></span><span style="display:flex;"><span>            $path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;images/</span><span style="color:#e6db74">{</span>$size<span style="color:#e6db74">}</span><span style="color:#e6db74">/&#34;</span> <span style="color:#f92672">.</span> <span style="color:#a6e22e">Str</span><span style="color:#f92672">::</span><span style="color:#a6e22e">uuid</span>() <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;.webp&#39;</span>;
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">put</span>(
+</span></span><span style="display:flex;"><span>                $path,
+</span></span><span style="display:flex;"><span>                $resized<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">encode</span>(<span style="color:#e6db74">&#39;webp&#39;</span>, <span style="color:#ae81ff">80</span>)
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            $paths[$size] <span style="color:#f92672">=</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">url</span>($path);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $paths;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="7-monitoring--profiling">7. Monitoring &amp; Profiling</h2>
+<h3 id="performance-monitoring">Performance Monitoring</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Middleware
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PerformanceMonitor</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handle</span>(<span style="color:#a6e22e">Request</span> $request, <span style="color:#a6e22e">Closure</span> $next)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $start <span style="color:#f92672">=</span> <span style="color:#a6e22e">microtime</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>        $startMemory <span style="color:#f92672">=</span> <span style="color:#a6e22e">memory_get_usage</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $response <span style="color:#f92672">=</span> $next($request);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $duration <span style="color:#f92672">=</span> (<span style="color:#a6e22e">microtime</span>(<span style="color:#66d9ef">true</span>) <span style="color:#f92672">-</span> $start) <span style="color:#f92672">*</span> <span style="color:#ae81ff">1000</span>;
+</span></span><span style="display:flex;"><span>        $memoryUsed <span style="color:#f92672">=</span> (<span style="color:#a6e22e">memory_get_usage</span>() <span style="color:#f92672">-</span> $startMemory) <span style="color:#f92672">/</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">/</span> <span style="color:#ae81ff">1024</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ($duration <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1000</span>) { <span style="color:#75715e">// Log slow requests
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">warning</span>(<span style="color:#e6db74">&#39;Slow request detected&#39;</span>, [
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;url&#39;</span> <span style="color:#f92672">=&gt;</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">fullUrl</span>(),
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;method&#39;</span> <span style="color:#f92672">=&gt;</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">method</span>(),
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;duration_ms&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">round</span>($duration, <span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;memory_mb&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">round</span>($memoryUsed, <span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>            ]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $response<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;X-Response-Time&#39;</span>, <span style="color:#a6e22e">round</span>($duration, <span style="color:#ae81ff">2</span>) <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;ms&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $response;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="query-monitoring">Query Monitoring</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// AppServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">app</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">environment</span>(<span style="color:#e6db74">&#39;local&#39;</span>)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">listen</span>(<span style="color:#66d9ef">function</span> ($query) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ($query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">time</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">100</span>) { <span style="color:#75715e">// Log queries over 100ms
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">warning</span>(<span style="color:#e6db74">&#39;Slow query detected&#39;</span>, [
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;sql&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">sql</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;bindings&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bindings</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;time&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">time</span>,
+</span></span><span style="display:flex;"><span>                ]);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="8-real-time-features-with-broadcasting">8. Real-Time Features with Broadcasting</h2>
+<h3 id="efficient-broadcasting">Efficient Broadcasting</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Event
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">OrderStatusUpdated</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">ShouldBroadcast</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Dispatchable</span>, <span style="color:#a6e22e">InteractsWithSockets</span>, <span style="color:#a6e22e">SerializesModels</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">Order</span> $order
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">broadcastOn</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">array</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">PrivateChannel</span>(<span style="color:#e6db74">&#39;orders.&#39;</span> <span style="color:#f92672">.</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">order</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user_id</span>),
+</span></span><span style="display:flex;"><span>        ];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">broadcastWith</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">array</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;id&#39;</span> <span style="color:#f92672">=&gt;</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">order</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;status&#39;</span> <span style="color:#f92672">=&gt;</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">order</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">status</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;updated_at&#39;</span> <span style="color:#f92672">=&gt;</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">order</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">updated_at</span>,
+</span></span><span style="display:flex;"><span>        ];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">broadcastQueue</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;broadcasts&#39;</span>; <span style="color:#75715e">// Separate queue for broadcasts
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// config/broadcasting.php
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;redis&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;driver&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;redis&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;connection&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;default&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;queue&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;broadcasts&#39;</span>,
+</span></span><span style="display:flex;"><span>],
+</span></span></code></pre></div><hr>
+<h2 id="performance-benchmarks">Performance Benchmarks</h2>
+<h3 id="before-optimization">Before Optimization</h3>
+<ul>
+<li><strong>Response Time:</strong> 800ms</li>
+<li><strong>Requests/sec:</strong> 50</li>
+<li><strong>Database Queries:</strong> 45 per request</li>
+<li><strong>Memory Usage:</strong> 128MB</li>
+</ul>
+<h3 id="after-optimization">After Optimization</h3>
+<ul>
+<li><strong>Response Time:</strong> 80ms (10x improvement)</li>
+<li><strong>Requests/sec:</strong> 500 (10x improvement)</li>
+<li><strong>Database Queries:</strong> 3 per request</li>
+<li><strong>Memory Usage:</strong> 32MB (4x improvement)</li>
+</ul>
+<hr>
+<h2 id="best-practices-checklist">Best Practices Checklist</h2>
+<ul>
+<li>✅ Use eager loading to prevent N+1 queries</li>
+<li>✅ Implement multi-layer caching (Redis + APCu)</li>
+<li>✅ Index database columns properly</li>
+<li>✅ Use queue workers for heavy tasks</li>
+<li>✅ Implement rate limiting on APIs</li>
+<li>✅ Configure read/write database replicas</li>
+<li>✅ Use CDN for static assets</li>
+<li>✅ Monitor and log slow queries</li>
+<li>✅ Optimize images before storage</li>
+<li>✅ Use Redis for sessions and cache</li>
+<li>✅ Implement horizontal scaling</li>
+<li>✅ Regular performance profiling</li>
+</ul>
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>Building high-concurrency Laravel applications requires a holistic approach combining database optimization, caching strategies, background processing, and proper scaling techniques. Start with these optimizations and continuously monitor your application&rsquo;s performance to identify bottlenecks.</p>
+<p>Remember: <strong>Premature optimization is the root of all evil. Profile first, optimize second.</strong></p>
+
+    </div>
+  </article>
+
+    </main>
+
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

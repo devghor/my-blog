@@ -1,0 +1,51 @@
+{{ define "main" }}
+  <!-- Hero Section -->
+  <article class="ph3 ph5-l pv5 tc fade-in">
+    <div class="mw7 center">
+      {{ .Content }}
+    </div>
+  </article>
+  
+  <!-- Blog Posts Section -->
+  <div class="mw8 center ph3 ph5-l pv5">
+    <h2 class="section-title mb4">📝 Latest Blog Posts</h2>
+    
+    <div class="flex flex-wrap nl4 nr4">
+      {{ range first 6 (where .Site.RegularPages "Section" "posts") }}
+        <div class="w-100 w-50-l pa3 scroll-reveal">
+          <div class="card h-100 flex flex-column">
+            <time class="f6 db mb3" style="color: var(--gold);">{{ .Date.Format "January 2, 2006" }}</time>
+            
+            <h3 class="f4 fw6 lh-title mt0 mb3">
+              <a href="{{ .Permalink }}" style="color: var(--text-primary);">
+                {{ .Title }}
+              </a>
+            </h3>
+            
+            <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+              {{ .Description }}
+            </p>
+            
+            {{ if .Params.tags }}
+              <div class="mb3">
+                {{ range first 3 .Params.tags }}
+                  <span class="tag dib mr2 mb2">{{ . }}</span>
+                {{ end }}
+              </div>
+            {{ end }}
+            
+            <a href="{{ .Permalink }}" class="f6 db">
+              Read more →
+            </a>
+          </div>
+        </div>
+      {{ end }}
+    </div>
+    
+    <div class="tc mt5">
+      <a href="/posts/" class="btn-primary">
+        View All Posts
+      </a>
+    </div>
+  </div>
+{{ end }}

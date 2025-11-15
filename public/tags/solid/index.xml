@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SOLID on IntellyGo</title>
+    <link>http://localhost:59620/tags/solid/</link>
+    <description>Recent content in SOLID on IntellyGo</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 12 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:59620/tags/solid/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SOLID Design Patterns in Laravel: Building Maintainable Applications</title>
+      <link>http://localhost:59620/posts/solid-design-patterns-laravel/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/posts/solid-design-patterns-laravel/</guid>
+      <description>&lt;h2 id=&#34;solid-design-patterns-in-laravel-building-maintainable-applications&#34;&gt;SOLID Design Patterns in Laravel: Building Maintainable Applications&lt;/h2&gt;&#xA;&lt;p&gt;SOLID principles are the foundation of clean, maintainable code. In this comprehensive guide, we&amp;rsquo;ll explore how to apply each SOLID principle in Laravel applications with practical examples.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;what-is-solid&#34;&gt;What is SOLID?&lt;/h2&gt;&#xA;&lt;p&gt;SOLID is an acronym for five design principles that help developers create more maintainable and scalable software:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;S&lt;/strong&gt; - Single Responsibility Principle&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;O&lt;/strong&gt; - Open/Closed Principle&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;L&lt;/strong&gt; - Liskov Substitution Principle&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;I&lt;/strong&gt; - Interface Segregation Principle&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;D&lt;/strong&gt; - Dependency Inversion Principle&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;1-single-responsibility-principle-srp&#34;&gt;1. Single Responsibility Principle (SRP)&lt;/h2&gt;&#xA;&lt;p&gt;&lt;strong&gt;Definition:&lt;/strong&gt; A class should have only one reason to change, meaning it should have only one job or responsibility.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

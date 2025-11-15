@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Enterprise on IntellyGo</title>
+    <link>http://localhost:1313/tags/enterprise/</link>
+    <description>Recent content in Enterprise on IntellyGo</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 20 Jun 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/enterprise/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CBL - City Bank Limited Portal</title>
+      <link>http://localhost:1313/projects/cbl/</link>
+      <pubDate>Thu, 20 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/cbl/</guid>
+      <description>&lt;h2 id=&#34;cbl---city-bank-limited-portal&#34;&gt;CBL - City Bank Limited Portal&lt;/h2&gt;&#xA;&lt;p&gt;An enterprise-grade banking portal designed for City Bank Limited, providing secure transaction management, account services, and customer relationship management.&lt;/p&gt;&#xA;&lt;h3 id=&#34;key-features&#34;&gt;Key Features&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Account Management&lt;/strong&gt;: Comprehensive account overview and management&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Transaction Processing&lt;/strong&gt;: Real-time transaction handling with security protocols&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Customer Portal&lt;/strong&gt;: Self-service portal for banking customers&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Reporting Dashboard&lt;/strong&gt;: Advanced analytics and reporting for bank operations&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: Multi-factor authentication and encryption standards&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;technologies-used&#34;&gt;Technologies Used&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Backend&lt;/strong&gt;: PHP Laravel&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Frontend&lt;/strong&gt;: React.js&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Database&lt;/strong&gt;: PostgreSQL&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: OAuth 2.0, JWT authentication&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;outcome&#34;&gt;Outcome&lt;/h3&gt;&#xA;&lt;p&gt;Enhanced customer experience with 24/7 banking services and reduced branch dependency by 45%.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Practices for Laravel Application Security | IntellyGo</title>
+    <meta name="description" content="Comprehensive guide to securing your Laravel applications. Learn authentication, authorization, CSRF protection, SQL injection prevention, and more.">
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+    
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-vh-100">
+        
+  <article class="pa3 pa5-ns mw7 center fade-in">
+    <h1 class="section-title mb4">
+      Best Practices for Laravel Application Security
+    </h1>
+    
+    <div class="lh-copy f5" style="color: var(--text-secondary);">
+      <h2 id="best-practices-for-laravel-application-security">Best Practices for Laravel Application Security</h2>
+<p>Security is not optional—it&rsquo;s essential. This comprehensive guide covers everything you need to know to build secure Laravel applications and protect your users&rsquo; data.</p>
+<hr>
+<h2 id="1-authentication--authorization">1. Authentication &amp; Authorization</h2>
+<h3 id="secure-password-handling">Secure Password Handling</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ✅ Always hash passwords
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Illuminate\Support\Facades\Hash</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserController</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;name&#39;</span> <span style="color:#f92672">=&gt;</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">Hash</span><span style="color:#f92672">::</span><span style="color:#a6e22e">make</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">password</span>), <span style="color:#75715e">// Bcrypt by default
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>($user, <span style="color:#ae81ff">201</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">checkPassword</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">find</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user_id</span>);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">Hash</span><span style="color:#f92672">::</span><span style="color:#a6e22e">check</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">password</span>, $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">password</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// Password matches
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// config/hashing.php - Configure bcrypt rounds
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;bcrypt&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;rounds&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;BCRYPT_ROUNDS&#39;</span>, <span style="color:#ae81ff">12</span>), <span style="color:#75715e">// Higher is more secure but slower
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>],
+</span></span></code></pre></div><h3 id="multi-factor-authentication-mfa">Multi-Factor Authentication (MFA)</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Laravel\Fortify\Features</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// fortify config
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;features&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Features</span><span style="color:#f92672">::</span><span style="color:#a6e22e">twoFactorAuthentication</span>([
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;confirm&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;confirmPassword&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>    ]),
+</span></span><span style="display:flex;"><span>],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Custom MFA implementation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MfaService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">generateSecret</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Google2FA</span><span style="color:#f92672">::</span><span style="color:#a6e22e">generateSecretKey</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">verifyCode</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $code)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Google2FA</span><span style="color:#f92672">::</span><span style="color:#a6e22e">verifyKey</span>($user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">two_factor_secret</span>, $code);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">generateQrCode</span>(<span style="color:#a6e22e">User</span> $user)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Google2FA</span><span style="color:#f92672">::</span><span style="color:#a6e22e">getQRCodeInline</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">config</span>(<span style="color:#e6db74">&#39;app.name&#39;</span>),
+</span></span><span style="display:flex;"><span>            $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span>,
+</span></span><span style="display:flex;"><span>            $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">two_factor_secret</span>
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="role-based-access-control-rbac">Role-Based Access Control (RBAC)</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Using Laravel&#39;s Gates
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// AuthServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Gate</span><span style="color:#f92672">::</span><span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;delete-post&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">Post</span> $post) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">===</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user_id</span> <span style="color:#f92672">||</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">isAdmin</span>();
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Gate</span><span style="color:#f92672">::</span><span style="color:#a6e22e">define</span>(<span style="color:#e6db74">&#39;manage-users&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">User</span> $user) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">hasRole</span>(<span style="color:#e6db74">&#39;admin&#39;</span>);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">destroy</span>(<span style="color:#a6e22e">Post</span> $post)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">authorize</span>(<span style="color:#e6db74">&#39;delete-post&#39;</span>, $post);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">delete</span>();
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([<span style="color:#e6db74">&#39;message&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Post deleted&#39;</span>]);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Using Policies
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostPolicy</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">update</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">Post</span> $post)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">===</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user_id</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">delete</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">Post</span> $post)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">===</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user_id</span> <span style="color:#f92672">||</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">isAdmin</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Register in AuthServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">protected</span> $policies <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">PostPolicy</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>,
+</span></span><span style="display:flex;"><span>];
+</span></span></code></pre></div><hr>
+<h2 id="2-protection-against-common-attacks">2. Protection Against Common Attacks</h2>
+<h3 id="sql-injection-prevention">SQL Injection Prevention</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ Never do this - SQL Injection vulnerable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$email <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">&#39;email&#39;</span>);
+</span></span><span style="display:flex;"><span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#34;SELECT * FROM users WHERE email = &#39;</span><span style="color:#e6db74">{</span>$email<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Always use parameter binding
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$email <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">&#39;email&#39;</span>);
+</span></span><span style="display:flex;"><span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;SELECT * FROM users WHERE email = ?&#39;</span>, [$email]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Better: Use Eloquent ORM (automatically prevents SQL injection)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;email&#39;</span>, <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">&#39;email&#39;</span>))<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Use Query Builder
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">table</span>(<span style="color:#e6db74">&#39;users&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;email&#39;</span>, <span style="color:#a6e22e">request</span>(<span style="color:#e6db74">&#39;email&#39;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span></code></pre></div><h3 id="xss-cross-site-scripting-prevention">XSS (Cross-Site Scripting) Prevention</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Blade automatically escapes output
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Escaped by default
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">div</span><span style="color:#f92672">&gt;</span>{{ $userInput }}<span style="color:#f92672">&lt;/</span><span style="color:#a6e22e">div</span><span style="color:#f92672">&gt;</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ❌ Raw output - only for trusted content
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">div</span><span style="color:#f92672">&gt;</span>{<span style="color:#f92672">!!</span> $trustedHtml <span style="color:#f92672">!!</span>}<span style="color:#f92672">&lt;/</span><span style="color:#a6e22e">div</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Use HTML Purifier for user-generated HTML
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">HTMLPurifier</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CommentService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">sanitizeComment</span>(<span style="color:#a6e22e">string</span> $comment)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $config <span style="color:#f92672">=</span> <span style="color:#a6e22e">HTMLPurifier_Config</span><span style="color:#f92672">::</span><span style="color:#a6e22e">createDefault</span>();
+</span></span><span style="display:flex;"><span>        $config<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">set</span>(<span style="color:#e6db74">&#39;HTML.Allowed&#39;</span>, <span style="color:#e6db74">&#39;p,b,i,strong,em,a[href],ul,ol,li&#39;</span>);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        $purifier <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">HTMLPurifier</span>($config);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $purifier<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">purify</span>($comment);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $comment <span style="color:#f92672">=</span> <span style="color:#a6e22e">Comment</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>([
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;content&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">app</span>(<span style="color:#a6e22e">CommentService</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">sanitizeComment</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">content</span>),
+</span></span><span style="display:flex;"><span>    ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>($comment);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="csrf-protection">CSRF Protection</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Laravel automatically protects POST, PUT, PATCH, DELETE requests
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Always include CSRF token in forms
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">form</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;POST&#34;</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/profile&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">@</span><span style="color:#a6e22e">csrf</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;!--</span> <span style="color:#a6e22e">form</span> <span style="color:#a6e22e">fields</span> <span style="color:#f92672">--&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/</span><span style="color:#a6e22e">form</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ For AJAX requests
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">meta</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;csrf-token&#34;</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ csrf_token() }}&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ajaxSetup</span>({
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;X-CSRF-TOKEN&#39;</span><span style="color:#f92672">:</span> <span style="color:#960050;background-color:#1e0010">$</span>(<span style="color:#e6db74">&#39;meta[name=&#34;csrf-token&#34;]&#39;</span>)<span style="color:#f92672">.</span><span style="color:#a6e22e">attr</span>(<span style="color:#e6db74">&#39;content&#39;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Or with Axios
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">axios</span><span style="color:#f92672">.</span><span style="color:#a6e22e">defaults</span><span style="color:#f92672">.</span><span style="color:#a6e22e">headers</span><span style="color:#f92672">.</span><span style="color:#a6e22e">common</span>[<span style="color:#e6db74">&#39;X-CSRF-TOKEN&#39;</span>] <span style="color:#f92672">=</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">document</span><span style="color:#f92672">.</span><span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">&#39;meta[name=&#34;csrf-token&#34;]&#39;</span>)<span style="color:#f92672">.</span><span style="color:#a6e22e">content</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/</span><span style="color:#a6e22e">script</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Exclude specific routes (use carefully!)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// VerifyCsrfToken middleware
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">protected</span> $except <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;webhook/payment&#39;</span>, <span style="color:#75715e">// External webhooks
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>];
+</span></span></code></pre></div><h3 id="mass-assignment-protection">Mass Assignment Protection</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Model
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">User</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Model</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ✅ Whitelist approach (recommended)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> $fillable <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;name&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;email&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;password&#39;</span>,
+</span></span><span style="display:flex;"><span>    ];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Or blacklist approach
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> $guarded <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;id&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;is_admin&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;remember_token&#39;</span>,
+</span></span><span style="display:flex;"><span>    ];
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ❌ Never do this
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>(<span style="color:#a6e22e">request</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">all</span>()); <span style="color:#75715e">// Dangerous!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Always validate and specify fields
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validated</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Or be explicit
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>([
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;name&#39;</span> <span style="color:#f92672">=&gt;</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">Hash</span><span style="color:#f92672">::</span><span style="color:#a6e22e">make</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">password</span>),
+</span></span><span style="display:flex;"><span>]);
+</span></span></code></pre></div><hr>
+<h2 id="3-api-security">3. API Security</h2>
+<h3 id="api-authentication-with-sanctum">API Authentication with Sanctum</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Setup Sanctum
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// User model
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Laravel\Sanctum\HasApiTokens</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">User</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Authenticatable</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">use</span> <span style="color:#a6e22e">HasApiTokens</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Login endpoint
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AuthController</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">login</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validate</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;required|email&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;required&#39;</span>,
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;email&#39;</span>, $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">first</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>$user <span style="color:#f92672">||</span> <span style="color:#f92672">!</span><span style="color:#a6e22e">Hash</span><span style="color:#f92672">::</span><span style="color:#a6e22e">check</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">password</span>, $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">password</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#a6e22e">ValidationException</span><span style="color:#f92672">::</span><span style="color:#a6e22e">withMessages</span>([
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;The provided credentials are incorrect.&#39;</span>],
+</span></span><span style="display:flex;"><span>            ]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Create token with abilities
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $token <span style="color:#f92672">=</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">createToken</span>(<span style="color:#e6db74">&#39;auth-token&#39;</span>, [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;user:read&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;user:write&#39;</span>,
+</span></span><span style="display:flex;"><span>        ])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">plainTextToken</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;token&#39;</span> <span style="color:#f92672">=&gt;</span> $token,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;user&#39;</span> <span style="color:#f92672">=&gt;</span> $user,
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">logout</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">currentAccessToken</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">delete</span>();
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([<span style="color:#e6db74">&#39;message&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Logged out&#39;</span>]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Protected routes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Route</span><span style="color:#f92672">::</span><span style="color:#a6e22e">middleware</span>(<span style="color:#e6db74">&#39;auth:sanctum&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">group</span>(<span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Route</span><span style="color:#f92672">::</span><span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/user&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>();
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="rate-limiting">Rate Limiting</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// RouteServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">configureRateLimiting</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Basic rate limiting
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">RateLimiter</span><span style="color:#f92672">::</span><span style="color:#a6e22e">for</span>(<span style="color:#e6db74">&#39;api&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perMinute</span>(<span style="color:#ae81ff">60</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">by</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">?-&gt;</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">?:</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">ip</span>());
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Login rate limiting
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">RateLimiter</span><span style="color:#f92672">::</span><span style="color:#a6e22e">for</span>(<span style="color:#e6db74">&#39;login&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perMinute</span>(<span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">by</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span> <span style="color:#f92672">.</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">ip</span>())
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">response</span>(<span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;message&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Too many login attempts.&#39;</span>
+</span></span><span style="display:flex;"><span>                ], <span style="color:#ae81ff">429</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Different limits based on user role
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">RateLimiter</span><span style="color:#f92672">::</span><span style="color:#a6e22e">for</span>(<span style="color:#e6db74">&#39;uploads&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Request</span> $request) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">?-&gt;</span><span style="color:#a6e22e">isPremium</span>()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perHour</span>(<span style="color:#ae81ff">1000</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Limit</span><span style="color:#f92672">::</span><span style="color:#a6e22e">perHour</span>(<span style="color:#ae81ff">100</span>);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Apply to routes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Route</span><span style="color:#f92672">::</span><span style="color:#a6e22e">middleware</span>([<span style="color:#e6db74">&#39;auth:sanctum&#39;</span>, <span style="color:#e6db74">&#39;throttle:api&#39;</span>])
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/data&#39;</span>, [<span style="color:#a6e22e">DataController</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#e6db74">&#39;index&#39;</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Route</span><span style="color:#f92672">::</span><span style="color:#a6e22e">middleware</span>(<span style="color:#e6db74">&#39;throttle:login&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/login&#39;</span>, [<span style="color:#a6e22e">AuthController</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#e6db74">&#39;login&#39;</span>]);
+</span></span></code></pre></div><h3 id="input-validation--sanitization">Input Validation &amp; Sanitization</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StorePostRequest</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">FormRequest</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">authorize</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">rules</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">array</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;title&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;required&#39;</span>, <span style="color:#e6db74">&#39;string&#39;</span>, <span style="color:#e6db74">&#39;max:255&#39;</span>, <span style="color:#e6db74">&#39;min:3&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;content&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;required&#39;</span>, <span style="color:#e6db74">&#39;string&#39;</span>, <span style="color:#e6db74">&#39;max:10000&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;category_id&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;required&#39;</span>, <span style="color:#e6db74">&#39;exists:categories,id&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;tags&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;nullable&#39;</span>, <span style="color:#e6db74">&#39;array&#39;</span>, <span style="color:#e6db74">&#39;max:5&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;tags.*&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;string&#39;</span>, <span style="color:#e6db74">&#39;max:50&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;published_at&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;nullable&#39;</span>, <span style="color:#e6db74">&#39;date&#39;</span>, <span style="color:#e6db74">&#39;after:now&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;image&#39;</span> <span style="color:#f92672">=&gt;</span> [<span style="color:#e6db74">&#39;nullable&#39;</span>, <span style="color:#e6db74">&#39;image&#39;</span>, <span style="color:#e6db74">&#39;mimes:jpg,png,webp&#39;</span>, <span style="color:#e6db74">&#39;max:2048&#39;</span>],
+</span></span><span style="display:flex;"><span>        ];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">messages</span>()<span style="color:#f92672">:</span> <span style="color:#66d9ef">array</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;title.required&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Post title is required&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;content.max&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;Content cannot exceed 10,000 characters&#39;</span>,
+</span></span><span style="display:flex;"><span>        ];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Custom validation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">withValidator</span>($validator)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $validator<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">after</span>(<span style="color:#66d9ef">function</span> ($validator) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ($this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">hasProfanity</span>($this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">title</span>)) {
+</span></span><span style="display:flex;"><span>                $validator<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">errors</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">add</span>(<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;Inappropriate content detected&#39;</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Sanitize input
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">prepareForValidation</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">merge</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;title&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">strip_tags</span>($this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">title</span>),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;slug&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">Str</span><span style="color:#f92672">::</span><span style="color:#a6e22e">slug</span>($this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">title</span>),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="4-secure-file-uploads">4. Secure File Uploads</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FileUploadService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">uploadFile</span>(<span style="color:#a6e22e">UploadedFile</span> $file, <span style="color:#a6e22e">string</span> $disk <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;private&#39;</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Validate file type
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $allowedMimes <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;image/jpeg&#39;</span>, <span style="color:#e6db74">&#39;image/png&#39;</span>, <span style="color:#e6db74">&#39;image/webp&#39;</span>, <span style="color:#e6db74">&#39;application/pdf&#39;</span>];
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">in_array</span>($file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getMimeType</span>(), $allowedMimes)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">\InvalidArgumentException</span>(<span style="color:#e6db74">&#39;Invalid file type&#39;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Validate file size (5MB max)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ($file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getSize</span>() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">5</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1024</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">\InvalidArgumentException</span>(<span style="color:#e6db74">&#39;File too large&#39;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Generate secure filename
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $filename <span style="color:#f92672">=</span> <span style="color:#a6e22e">Str</span><span style="color:#f92672">::</span><span style="color:#a6e22e">uuid</span>() <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">.</span> $file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getClientOriginalExtension</span>();
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Store file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $path <span style="color:#f92672">=</span> $file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">storeAs</span>(<span style="color:#e6db74">&#39;uploads&#39;</span>, $filename, $disk);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Scan for malware (if antivirus available)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// $this-&gt;scanFile($path);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $path;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getSignedUrl</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Generate temporary signed URL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">temporaryUrl</span>(
+</span></span><span style="display:flex;"><span>            $path,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">now</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">addMinutes</span>(<span style="color:#ae81ff">30</span>)
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">upload</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validate</span>([
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;file&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;required|file|mimes:jpg,png,pdf|max:5120&#39;</span>,
+</span></span><span style="display:flex;"><span>    ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    $path <span style="color:#f92672">=</span> <span style="color:#a6e22e">app</span>(<span style="color:#a6e22e">FileUploadService</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">uploadFile</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">file</span>(<span style="color:#e6db74">&#39;file&#39;</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>([<span style="color:#e6db74">&#39;path&#39;</span> <span style="color:#f92672">=&gt;</span> $path]);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Download with authorization
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">download</span>(<span style="color:#a6e22e">Request</span> $request, <span style="color:#a6e22e">string</span> $filename)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">authorize</span>(<span style="color:#e6db74">&#39;download-file&#39;</span>, $filename);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;private&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">exists</span>($filename)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">abort</span>(<span style="color:#ae81ff">404</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;private&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">download</span>($filename);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="5-secure-configuration">5. Secure Configuration</h2>
+<h3 id="environment-variables">Environment Variables</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ Never commit .env file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ❌ Never hardcode sensitive data
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Use environment variables
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;database&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;DB_PASSWORD&#39;</span>),
+</span></span><span style="display:flex;"><span>],
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;services&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;stripe&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;secret&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;STRIPE_SECRET&#39;</span>),
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>],
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Validate required env variables
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// AppServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $required <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;APP_KEY&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;DB_PASSWORD&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;MAIL_PASSWORD&#39;</span>,
+</span></span><span style="display:flex;"><span>    ];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">foreach</span> ($required <span style="color:#66d9ef">as</span> $var) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">env</span>($var)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">\RuntimeException</span>(<span style="color:#e6db74">&#34;Missing required environment variable: </span><span style="color:#e6db74">{</span>$var<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="security-headers">Security Headers</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Middleware
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SecurityHeaders</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">handle</span>(<span style="color:#a6e22e">Request</span> $request, <span style="color:#a6e22e">Closure</span> $next)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $response <span style="color:#f92672">=</span> $next($request);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $response
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;X-Content-Type-Options&#39;</span>, <span style="color:#e6db74">&#39;nosniff&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;X-Frame-Options&#39;</span>, <span style="color:#e6db74">&#39;SAMEORIGIN&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;X-XSS-Protection&#39;</span>, <span style="color:#e6db74">&#39;1; mode=block&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;Strict-Transport-Security&#39;</span>, <span style="color:#e6db74">&#39;max-age=31536000; includeSubDomains&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;Content-Security-Policy&#39;</span>, <span style="color:#e6db74">&#34;default-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-inline&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;Referrer-Policy&#39;</span>, <span style="color:#e6db74">&#39;strict-origin-when-cross-origin&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">header</span>(<span style="color:#e6db74">&#39;Permissions-Policy&#39;</span>, <span style="color:#e6db74">&#39;geolocation=(), microphone=(), camera=()&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Register in Kernel
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">protected</span> $middleware <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">\App\Http\Middleware\SecurityHeaders</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>,
+</span></span><span style="display:flex;"><span>];
+</span></span></code></pre></div><hr>
+<h2 id="6-logging--monitoring">6. Logging &amp; Monitoring</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Log security events
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SecurityLogger</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">logFailedLogin</span>(<span style="color:#a6e22e">string</span> $email, <span style="color:#a6e22e">string</span> $ip)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">channel</span>(<span style="color:#e6db74">&#39;security&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">warning</span>(<span style="color:#e6db74">&#39;Failed login attempt&#39;</span>, [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> $email,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;ip&#39;</span> <span style="color:#f92672">=&gt;</span> $ip,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;user_agent&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">request</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">userAgent</span>(),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;timestamp&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">now</span>(),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">logSuspiciousActivity</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $action)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">channel</span>(<span style="color:#e6db74">&#39;security&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;Suspicious activity detected&#39;</span>, [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;user_id&#39;</span> <span style="color:#f92672">=&gt;</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;action&#39;</span> <span style="color:#f92672">=&gt;</span> $action,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;ip&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">request</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">ip</span>(),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;timestamp&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">now</span>(),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Send notification to admin
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Notification</span><span style="color:#f92672">::</span><span style="color:#a6e22e">route</span>(<span style="color:#e6db74">&#39;slack&#39;</span>, <span style="color:#a6e22e">config</span>(<span style="color:#e6db74">&#39;logging.slack.url&#39;</span>))
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">notify</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">SuspiciousActivityDetected</span>($user, $action));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Monitor authentication attempts
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// EventServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">protected</span> $listen <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">\Illuminate\Auth\Events\Failed</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">\App\Listeners\LogFailedLogin</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">\Illuminate\Auth\Events\Lockout</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">\App\Listeners\NotifyAccountLockout</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>,
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>];
+</span></span></code></pre></div><hr>
+<h2 id="7-database-security">7. Database Security</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Use encrypted fields for sensitive data
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Illuminate\Database\Eloquent\Casts\Attribute</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">User</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Model</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">protected</span> $casts <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;social_security&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;encrypted&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;credit_card&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;encrypted&#39;</span>,
+</span></span><span style="display:flex;"><span>    ];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Or custom encryption
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">socialSecurity</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">Attribute</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Attribute</span><span style="color:#f92672">::</span><span style="color:#a6e22e">make</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">get</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">fn</span> ($value) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">decrypt</span>($value),
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">set</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">fn</span> ($value) <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">encrypt</span>($value),
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Backup encryption
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#e6db74">&#39;connections&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;mysql&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;options&#39;</span> <span style="color:#f92672">=&gt;</span> [
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">PDO</span><span style="color:#f92672">::</span><span style="color:#a6e22e">MYSQL_ATTR_SSL_CA</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">env</span>(<span style="color:#e6db74">&#39;MYSQL_SSL_CA&#39;</span>),
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">PDO</span><span style="color:#f92672">::</span><span style="color:#a6e22e">MYSQL_ATTR_SSL_VERIFY_SERVER_CERT</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>],
+</span></span></code></pre></div><hr>
+<h2 id="security-checklist">Security Checklist</h2>
+<ul>
+<li>✅ Use HTTPS everywhere (SSL/TLS)</li>
+<li>✅ Keep Laravel and dependencies updated</li>
+<li>✅ Hash all passwords with bcrypt</li>
+<li>✅ Implement MFA for sensitive accounts</li>
+<li>✅ Validate and sanitize all user input</li>
+<li>✅ Protect against SQL injection with ORM</li>
+<li>✅ Enable CSRF protection</li>
+<li>✅ Implement rate limiting</li>
+<li>✅ Use Content Security Policy headers</li>
+<li>✅ Secure file uploads</li>
+<li>✅ Never commit .env files</li>
+<li>✅ Use signed URLs for private files</li>
+<li>✅ Log security events</li>
+<li>✅ Implement proper RBAC</li>
+<li>✅ Encrypt sensitive database fields</li>
+<li>✅ Regular security audits</li>
+<li>✅ Keep backups encrypted</li>
+</ul>
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>Security is an ongoing process, not a one-time task. Regularly audit your code, keep dependencies updated, and stay informed about new vulnerabilities. Use Laravel&rsquo;s built-in security features—they&rsquo;re battle-tested and robust.</p>
+<p><strong>Remember: The cost of preventing a breach is always less than recovering from one.</strong></p>
+
+    </div>
+  </article>
+
+    </main>
+
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

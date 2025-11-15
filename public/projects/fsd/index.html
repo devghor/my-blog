@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSD - Facility Service Desk | IntellyGo</title>
+    <meta name="description" content="Comprehensive facility management and service desk solution for streamlined operations">
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+    
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-vh-100">
+        
+  <article class="pa3 pa5-ns mw7 center fade-in">
+    
+      <div class="mb4">
+        
+        
+        
+          <div class="flex flex-wrap nl2 nr2">
+            
+              <div class="w-50 pa2">
+                <img src="/images/fsd/fsd_vms_dashboard.png" alt="FSD - Facility Service Desk" class="w-100 br2" style="box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);" />
+              </div>
+            
+          </div>
+        
+      </div>
+    
+    
+    <header class="mb5">
+      <h1 class="section-title mb4">
+        FSD - Facility Service Desk
+      </h1>
+      
+      <div class="f6 mb4" style="color: var(--gold);">
+        <time>September 25, 2024</time>
+        
+          <span class="mh2">•</span>
+          
+            
+            <a href="/tags/laravel">Laravel</a>
+          
+            , 
+            <a href="/tags/vue.js">Vue.js</a>
+          
+            , 
+            <a href="/tags/facility-management">Facility Management</a>
+          
+            , 
+            <a href="/tags/service-desk">Service Desk</a>
+          
+        
+      </div>
+      
+      
+        <p class="f5 lh-copy mb4 pb4" style="color: var(--text-secondary); border-bottom: 1px solid rgba(255, 215, 0, 0.1);">
+          Comprehensive facility management and service desk solution for streamlined operations
+        </p>
+      
+    </header>
+    
+    <div class="lh-copy f5" style="color: var(--text-secondary);">
+      <h2 id="fsd---facility-service-desk">FSD - Facility Service Desk</h2>
+<p>A comprehensive Facility Service Desk system designed to streamline facility management operations, maintenance requests, and service delivery across multiple locations.</p>
+<h3 id="key-features">Key Features</h3>
+<ul>
+<li><strong>Service Request Management</strong>: Centralized system for submitting and tracking facility service requests</li>
+<li><strong>Work Order System</strong>: Automated work order generation and assignment to technicians</li>
+<li><strong>Asset Management</strong>: Complete tracking of facility assets, equipment, and inventory</li>
+<li><strong>Preventive Maintenance</strong>: Scheduled maintenance planning and execution</li>
+<li><strong>Vendor Management</strong>: Vendor registration, performance tracking, and contract management</li>
+<li><strong>Real-time Dashboard</strong>: Live monitoring of service requests, work orders, and team performance</li>
+<li><strong>Mobile Access</strong>: Technicians can access and update work orders from mobile devices</li>
+<li><strong>Reporting &amp; Analytics</strong>: Comprehensive reports on facility operations and service metrics</li>
+</ul>
+<h3 id="technologies-used">Technologies Used</h3>
+<ul>
+<li><strong>Backend</strong>: PHP Laravel</li>
+<li><strong>Frontend</strong>: Vue.js, Bootstrap</li>
+<li><strong>Database</strong>: MySQL</li>
+<li><strong>API</strong>: RESTful API architecture</li>
+<li><strong>Mobile</strong>: Progressive Web App (PWA)</li>
+</ul>
+<h3 id="modules">Modules</h3>
+<ol>
+<li>
+<p><strong>Service Request Module</strong></p>
+<ul>
+<li>Multi-category service requests</li>
+<li>Priority-based ticket system</li>
+<li>Automated routing and assignment</li>
+<li>Email notifications</li>
+</ul>
+</li>
+<li>
+<p><strong>Work Order Management</strong></p>
+<ul>
+<li>Work order lifecycle tracking</li>
+<li>Technician assignment and scheduling</li>
+<li>Time tracking and cost estimation</li>
+<li>Material and spare parts management</li>
+</ul>
+</li>
+<li>
+<p><strong>Asset Management</strong></p>
+<ul>
+<li>Asset registry and QR code tagging</li>
+<li>Maintenance history tracking</li>
+<li>Warranty management</li>
+<li>Depreciation calculation</li>
+</ul>
+</li>
+<li>
+<p><strong>Preventive Maintenance</strong></p>
+<ul>
+<li>Maintenance schedule planning</li>
+<li>Automated work order generation</li>
+<li>Equipment downtime tracking</li>
+<li>Compliance checklists</li>
+</ul>
+</li>
+<li>
+<p><strong>Vendor Management</strong></p>
+<ul>
+<li>Vendor registration and rating</li>
+<li>Contract management</li>
+<li>Service level agreement (SLA) tracking</li>
+<li>Payment processing</li>
+</ul>
+</li>
+</ol>
+<h3 id="outcome">Outcome</h3>
+<p>Successfully deployed across multiple corporate facilities, managing 5000+ service requests monthly with improved response time by 50% and reduced operational costs by 35%.</p>
+
+    </div>
+    
+    
+      <div class="mt5 pt4" style="border-top: 1px solid rgba(255, 215, 0, 0.1);">
+        <h3 class="f5 fw6 mb3" style="color: var(--gold);">Tags</h3>
+        
+          <a href="/tags/laravel" class="tag dib mr2 mb2">
+            Laravel
+          </a>
+        
+          <a href="/tags/vue.js" class="tag dib mr2 mb2">
+            Vue.js
+          </a>
+        
+          <a href="/tags/facility-management" class="tag dib mr2 mb2">
+            Facility Management
+          </a>
+        
+          <a href="/tags/service-desk" class="tag dib mr2 mb2">
+            Service Desk
+          </a>
+        
+      </div>
+    
+    
+    <div class="mt5 pt4" style="border-top: 1px solid rgba(255, 215, 0, 0.1);">
+      <a href="/projects/" class="f6">
+        ← Back to Projects
+      </a>
+    </div>
+  </article>
+
+    </main>
+
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

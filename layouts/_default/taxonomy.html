@@ -1,0 +1,20 @@
+{{ define "main" }}
+  <article class="pa3 pa5-ns mw7 center">
+    <h1 class="f2 fw6 lh-title mt0 mb3">
+      {{ .Title }}
+    </h1>
+    
+    {{ .Content }}
+    
+    <div class="mt4">
+      {{ range .Pages }}
+        <div class="mb2">
+          <a href="{{ .Permalink }}" class="f5 link blue hover-dark-blue">
+            {{ .Title }}
+          </a>
+          <span class="f6 gray ml2">({{ len .Pages }} posts)</span>
+        </div>
+      {{ end }}
+    </div>
+  </article>
+{{ end }}

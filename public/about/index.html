@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me | IntellyGo</title>
+    <meta name="description" content="Full Stack Software Engineer with 8&#43; years of experience">
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+    
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-vh-100">
+        
+  <article class="fade-in">
+    
+    <div class="ph3 ph5-l pv5 tc" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.02));">
+      <div class="mw7 center">
+        <h1 class="f1 fw7 mb3" style="color: var(--text-primary);">
+          About Me
+        </h1>
+        <p class="f4 lh-copy" style="color: var(--gold);">
+          Full Stack Software Engineer with 8+ years of experience
+        </p>
+      </div>
+    </div>
+    
+    
+    <div class="mw8 center ph3 ph5-l pv5">
+      
+      <div class="card mb5 pa4 scroll-reveal">
+        <div class="f3 lh-copy" style="color: var(--text-primary);">
+          <p class="mt0 mb4">👋 Hi, I'm <span style="color: var(--gold); font-weight: 600;">Hafijur Rahaman</span></p>
+          <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.8;">
+            I am a <strong style="color: var(--text-primary);">fullstack Software Engineer</strong> with <strong style="color: var(--gold);">8 years of experience</strong> in Laravel, PHP, Node.js, and system design. Expert in scalable SaaS, HRIS/HRMS, APIs, and cloud-native architectures.
+          </p>
+        </div>
+      </div>
+      
+      
+      <div class="mb5">
+        <h2 class="section-title mb4">💼 Core Skills</h2>
+        
+        <div class="flex flex-wrap nl3 nr3">
+          
+          <div class="w-100 w-50-l pa3 scroll-reveal">
+            <div class="card h-100 pa4">
+              <div class="flex items-center mb3">
+                <span class="f2 mr3">💻</span>
+                <h3 class="f4 fw6 ma0" style="color: var(--gold);">Backend & Frameworks</h3>
+              </div>
+              <ul class="list pl0 f5 lh-copy" style="color: var(--text-secondary);">
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Laravel</strong> - Expert in building enterprise-level applications</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">PHP</strong> - Deep understanding of modern PHP development</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Node.js</strong> - Building scalable server-side applications</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          
+          <div class="w-100 w-50-l pa3 scroll-reveal">
+            <div class="card h-100 pa4">
+              <div class="flex items-center mb3">
+                <span class="f2 mr3">🎨</span>
+                <h3 class="f4 fw6 ma0" style="color: var(--gold);">Frontend & UI</h3>
+              </div>
+              <ul class="list pl0 f5 lh-copy" style="color: var(--text-secondary);">
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Vue.js</strong> - Component-based UI development</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">React</strong> - Modern frontend applications</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Nuxt.js & Next.js</strong> - SSR frameworks</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Alpine.js</strong> - Lightweight reactive framework</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Bootstrap, Inertia.js, Filament</strong></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          
+          <div class="w-100 w-50-l pa3 scroll-reveal">
+            <div class="card h-100 pa4">
+              <div class="flex items-center mb3">
+                <span class="f2 mr3">🗄️</span>
+                <h3 class="f4 fw6 ma0" style="color: var(--gold);">Databases</h3>
+              </div>
+              <ul class="list pl0 f5 lh-copy" style="color: var(--text-secondary);">
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">MySQL</strong> - Relational database design & optimization</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">PostgreSQL</strong> - Advanced features & performance</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Oracle</strong> - Enterprise database solutions</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          
+          <div class="w-100 w-50-l pa3 scroll-reveal">
+            <div class="card h-100 pa4">
+              <div class="flex items-center mb3">
+                <span class="f2 mr3">⚙️</span>
+                <h3 class="f4 fw6 ma0" style="color: var(--gold);">Architecture & System Design</h3>
+              </div>
+              <ul class="list pl0 f5 lh-copy" style="color: var(--text-secondary);">
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">REST APIs</strong> - Designing RESTful services</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Microservices</strong> - Distributed systems</span>
+                </li>
+                <li class="mb3 flex items-start">
+                  <span class="mr2" style="color: var(--gold);">▸</span>
+                  <span><strong style="color: var(--text-primary);">Scalable Systems</strong> - High-performance architecture</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="mb5 scroll-reveal">
+        <h2 class="section-title mb4">🚀 What I Do</h2>
+        <div class="card pa4">
+          <p class="f4 lh-copy mb4" style="color: var(--text-secondary);">
+            I specialize in building <strong style="color: var(--gold);">robust, scalable web applications</strong> that solve real business problems. My expertise spans the entire software development lifecycle, from architecture design to deployment and maintenance.
+          </p>
+          
+          <div class="flex flex-wrap nl2 nr2 mt4">
+            <div class="w-100 w-third-l pa2">
+              <div class="pa3 br2" style="background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--gold);">
+                <div class="f5 fw6 mb2" style="color: var(--gold);">🏗️ System Architecture</div>
+                <div class="f6 lh-copy" style="color: var(--text-secondary);">Designing scalable and maintainable systems</div>
+              </div>
+            </div>
+            <div class="w-100 w-third-l pa2">
+              <div class="pa3 br2" style="background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--gold);">
+                <div class="f5 fw6 mb2" style="color: var(--gold);">🔧 Full Stack Development</div>
+                <div class="f6 lh-copy" style="color: var(--text-secondary);">End-to-end application development</div>
+              </div>
+            </div>
+            <div class="w-100 w-third-l pa2">
+              <div class="pa3 br2" style="background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--gold);">
+                <div class="f5 fw6 mb2" style="color: var(--gold);">📊 HRMS Solutions</div>
+                <div class="f6 lh-copy" style="color: var(--text-secondary);">Specialized in HR management systems</div>
+              </div>
+            </div>
+            <div class="w-100 w-third-l pa2">
+              <div class="pa3 br2" style="background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--gold);">
+                <div class="f5 fw6 mb2" style="color: var(--gold);">☁️ Cloud-Native</div>
+                <div class="f6 lh-copy" style="color: var(--text-secondary);">Building modern cloud applications</div>
+              </div>
+            </div>
+            <div class="w-100 w-third-l pa2">
+              <div class="pa3 br2" style="background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--gold);">
+                <div class="f5 fw6 mb2" style="color: var(--gold);">🔌 API Development</div>
+                <div class="f6 lh-copy" style="color: var(--text-secondary);">RESTful and GraphQL APIs</div>
+              </div>
+            </div>
+            <div class="w-100 w-third-l pa2">
+              <div class="pa3 br2" style="background: rgba(255, 215, 0, 0.05); border-left: 3px solid var(--gold);">
+                <div class="f5 fw6 mb2" style="color: var(--gold);">📈 Performance</div>
+                <div class="f6 lh-copy" style="color: var(--text-secondary);">Making applications fast & efficient</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="mb5 scroll-reveal">
+        <h2 class="section-title mb4">🏢 Domains & Applications</h2>
+        <div class="flex flex-wrap nl3 nr3">
+          <div class="w-100 w-50-l pa3">
+            <div class="card pa4 h-100">
+              <h3 class="f3 fw6 mb3" style="color: var(--gold);">SaaS Platforms</h3>
+              <p class="f5 lh-copy ma0" style="color: var(--text-secondary);">
+                Multi-tenant cloud applications with scalable architecture, subscription management, and enterprise-grade security.
+              </p>
+            </div>
+          </div>
+          <div class="w-100 w-50-l pa3">
+            <div class="card pa4 h-100">
+              <h3 class="f3 fw6 mb3" style="color: var(--gold);">HRIS/HRMS Solutions</h3>
+              <p class="f5 lh-copy ma0" style="color: var(--text-secondary);">
+                Comprehensive human resource management systems with attendance, payroll, leave management, and performance tracking.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="mb5 scroll-reveal">
+        <h2 class="section-title mb4">💼 Portfolio</h2>
+        <p class="f4 lh-copy mb4" style="color: var(--text-secondary);">
+          Explore some of my key projects showcasing expertise in web application development, HRMS solutions, and system architecture.
+        </p>
+        
+        <div class="flex flex-wrap nl3 nr3">
+          
+          
+            <div class="w-100 w-50-l pa3">
+              <article class="card h-100 flex flex-column">
+                
+                  <div class="aspect-ratio aspect-ratio--16x9 mb3 overflow-hidden br2">
+                    
+                    
+                    
+                      
+                      <img src="/images/hr4u/hr4u_attendance_report.png" alt="HR4U - Human Resource Management System" class="aspect-ratio--object cover" style="object-fit: cover;" />
+                    
+                  </div>
+                
+                
+                <h3 class="f4 fw6 lh-title mt0 mb3">
+                  <a href="http://localhost:59620/projects/hr4u/" style="color: var(--text-primary);">
+                    HR4U - Human Resource Management System
+                  </a>
+                </h3>
+                
+                <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+                  Comprehensive HRMS solution for streamlined workforce management
+                </p>
+                
+                
+                  <div class="mb3">
+                    
+                      <span class="tag dib mr2 mb2">Laravel</span>
+                    
+                      <span class="tag dib mr2 mb2">Vue.js</span>
+                    
+                      <span class="tag dib mr2 mb2">HRMS</span>
+                    
+                      <span class="tag dib mr2 mb2">Web Application</span>
+                    
+                  </div>
+                
+                
+                <a href="http://localhost:59620/projects/hr4u/" class="f6 db">
+                  View Project →
+                </a>
+              </article>
+            </div>
+          
+            <div class="w-100 w-50-l pa3">
+              <article class="card h-100 flex flex-column">
+                
+                  <div class="aspect-ratio aspect-ratio--16x9 mb3 overflow-hidden br2">
+                    
+                    
+                    
+                      
+                      <img src="/images/cbl/cbl_dashboard.png" alt="CBL - City Bank Limited Portal" class="aspect-ratio--object cover" style="object-fit: cover;" />
+                    
+                  </div>
+                
+                
+                <h3 class="f4 fw6 lh-title mt0 mb3">
+                  <a href="http://localhost:59620/projects/cbl/" style="color: var(--text-primary);">
+                    CBL - City Bank Limited Portal
+                  </a>
+                </h3>
+                
+                <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+                  Enterprise banking portal with advanced transaction management
+                </p>
+                
+                
+                  <div class="mb3">
+                    
+                      <span class="tag dib mr2 mb2">Laravel</span>
+                    
+                      <span class="tag dib mr2 mb2">React</span>
+                    
+                      <span class="tag dib mr2 mb2">Banking</span>
+                    
+                      <span class="tag dib mr2 mb2">Enterprise</span>
+                    
+                  </div>
+                
+                
+                <a href="http://localhost:59620/projects/cbl/" class="f6 db">
+                  View Project →
+                </a>
+              </article>
+            </div>
+          
+            <div class="w-100 w-50-l pa3">
+              <article class="card h-100 flex flex-column">
+                
+                  <div class="aspect-ratio aspect-ratio--16x9 mb3 overflow-hidden br2">
+                    
+                    
+                    
+                      
+                      <img src="/images/idcol/idcol_employee_dashboard.png" alt="IDCOL - Infrastructure Development Company" class="aspect-ratio--object cover" style="object-fit: cover;" />
+                    
+                  </div>
+                
+                
+                <h3 class="f4 fw6 lh-title mt0 mb3">
+                  <a href="http://localhost:59620/projects/idcol/" style="color: var(--text-primary);">
+                    IDCOL - Infrastructure Development Company
+                  </a>
+                </h3>
+                
+                <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+                  Project management and financing portal for infrastructure development
+                </p>
+                
+                
+                  <div class="mb3">
+                    
+                      <span class="tag dib mr2 mb2">Laravel</span>
+                    
+                      <span class="tag dib mr2 mb2">Vue.js</span>
+                    
+                      <span class="tag dib mr2 mb2">Project Management</span>
+                    
+                      <span class="tag dib mr2 mb2">Finance</span>
+                    
+                  </div>
+                
+                
+                <a href="http://localhost:59620/projects/idcol/" class="f6 db">
+                  View Project →
+                </a>
+              </article>
+            </div>
+          
+            <div class="w-100 w-50-l pa3">
+              <article class="card h-100 flex flex-column">
+                
+                  <div class="aspect-ratio aspect-ratio--16x9 mb3 overflow-hidden br2">
+                    
+                    
+                    
+                      
+                      <img src="/images/jbl/jbl_employee_dashboard.png" alt="JBL - Jamuna Bank Limited System" class="aspect-ratio--object cover" style="object-fit: cover;" />
+                    
+                  </div>
+                
+                
+                <h3 class="f4 fw6 lh-title mt0 mb3">
+                  <a href="http://localhost:59620/projects/jbl/" style="color: var(--text-primary);">
+                    JBL - Jamuna Bank Limited System
+                  </a>
+                </h3>
+                
+                <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+                  Core banking system with integrated financial services
+                </p>
+                
+                
+                  <div class="mb3">
+                    
+                      <span class="tag dib mr2 mb2">Laravel</span>
+                    
+                      <span class="tag dib mr2 mb2">Alpine.js</span>
+                    
+                      <span class="tag dib mr2 mb2">Banking</span>
+                    
+                      <span class="tag dib mr2 mb2">Financial Services</span>
+                    
+                  </div>
+                
+                
+                <a href="http://localhost:59620/projects/jbl/" class="f6 db">
+                  View Project →
+                </a>
+              </article>
+            </div>
+          
+            <div class="w-100 w-50-l pa3">
+              <article class="card h-100 flex flex-column">
+                
+                  <div class="aspect-ratio aspect-ratio--16x9 mb3 overflow-hidden br2">
+                    
+                    
+                    
+                      
+                      <img src="/images/fsd/fsd_vms_dashboard.png" alt="FSD - Facility Service Desk" class="aspect-ratio--object cover" style="object-fit: cover;" />
+                    
+                  </div>
+                
+                
+                <h3 class="f4 fw6 lh-title mt0 mb3">
+                  <a href="http://localhost:59620/projects/fsd/" style="color: var(--text-primary);">
+                    FSD - Facility Service Desk
+                  </a>
+                </h3>
+                
+                <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+                  Comprehensive facility management and service desk solution for streamlined operations
+                </p>
+                
+                
+                  <div class="mb3">
+                    
+                      <span class="tag dib mr2 mb2">Laravel</span>
+                    
+                      <span class="tag dib mr2 mb2">Vue.js</span>
+                    
+                      <span class="tag dib mr2 mb2">Facility Management</span>
+                    
+                      <span class="tag dib mr2 mb2">Service Desk</span>
+                    
+                  </div>
+                
+                
+                <a href="http://localhost:59620/projects/fsd/" class="f6 db">
+                  View Project →
+                </a>
+              </article>
+            </div>
+          
+        </div>
+      </div>
+      
+      
+      <div class="scroll-reveal">
+        <h2 class="section-title mb4">📫 Get In Touch</h2>
+        <div class="card pa4">
+          <p class="f4 lh-copy mb4" style="color: var(--text-secondary);">
+            I'm always interested in hearing about new projects and opportunities.
+          </p>
+          
+          <div class="flex flex-wrap nl3 nr3">
+            <div class="w-100 w-third-l pa3">
+              <a href="https://www.linkedin.com/in/hafijur-rahaman/" target="_blank" class="db pa3 tc br2 no-underline" style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); transition: all 0.3s ease;">
+                <div class="f3 mb2">🔗</div>
+                <div class="f5 fw6" style="color: var(--gold);">LinkedIn</div>
+                <div class="f6 mt2" style="color: var(--text-secondary);">hafijur-rahaman</div>
+              </a>
+            </div>
+            <div class="w-100 w-third-l pa3">
+              <a href="https://github.com/devghor" target="_blank" class="db pa3 tc br2 no-underline" style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); transition: all 0.3s ease;">
+                <div class="f3 mb2">💻</div>
+                <div class="f5 fw6" style="color: var(--gold);">GitHub</div>
+                <div class="f6 mt2" style="color: var(--text-secondary);">devghor</div>
+              </a>
+            </div>
+            <div class="w-100 w-third-l pa3">
+              <div class="db pa3 tc br2" style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);">
+                <div class="f3 mb2">📍</div>
+                <div class="f5 fw6" style="color: var(--gold);">Location</div>
+                <div class="f6 mt2" style="color: var(--text-secondary);">Dhaka, Bangladesh</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="mt5 pt5 scroll-reveal" style="border-top: 1px solid rgba(255, 215, 0, 0.1);">
+        <div class="tc">
+          <h3 class="f3 fw6 mb3" style="color: var(--gold);">💡 My Philosophy</h3>
+          <p class="f4 lh-copy mw6 center" style="color: var(--text-secondary);">
+            I believe in writing <strong style="color: var(--text-primary);">clean, maintainable code</strong> and following <strong style="color: var(--text-primary);">best practices</strong>. Continuous learning and staying updated with the latest technologies is part of my daily routine. I'm passionate about solving complex problems and building systems that make a difference.
+          </p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+    </main>
+
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

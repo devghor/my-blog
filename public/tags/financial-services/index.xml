@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Financial Services on IntellyGo</title>
+    <link>http://localhost:1313/tags/financial-services/</link>
+    <description>Recent content in Financial Services on IntellyGo</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 05 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/financial-services/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>JBL - Jamuna Bank Limited System</title>
+      <link>http://localhost:1313/projects/jbl/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/jbl/</guid>
+      <description>&lt;h2 id=&#34;jbl---jamuna-bank-limited-system&#34;&gt;JBL - Jamuna Bank Limited System&lt;/h2&gt;&#xA;&lt;p&gt;A comprehensive core banking system developed for Jamuna Bank Limited, integrating various banking services and financial operations.&lt;/p&gt;&#xA;&lt;h3 id=&#34;key-features&#34;&gt;Key Features&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Core Banking Operations&lt;/strong&gt;: Account management, deposits, withdrawals&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Loan Management&lt;/strong&gt;: Credit processing and loan tracking system&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Inter-branch Transactions&lt;/strong&gt;: Seamless branch-to-branch operations&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Compliance Module&lt;/strong&gt;: Regulatory compliance and reporting&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Mobile Banking Integration&lt;/strong&gt;: API integration with mobile banking app&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;technologies-used&#34;&gt;Technologies Used&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Backend&lt;/strong&gt;: PHP Laravel, Golang (microservices)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Frontend&lt;/strong&gt;: Alpine.js, Tailwind CSS&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Database&lt;/strong&gt;: MySQL with replication&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;API&lt;/strong&gt;: RESTful and GraphQL APIs&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;outcome&#34;&gt;Outcome&lt;/h3&gt;&#xA;&lt;p&gt;Modernized banking operations serving 500,000+ customers with 99.9% uptime and improved transaction speed by 70%.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

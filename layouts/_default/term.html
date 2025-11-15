@@ -1,0 +1,31 @@
+{{ define "main" }}
+  <article class="pa3 pa5-ns mw7 center">
+    <h1 class="f2 fw6 lh-title mt0 mb3">
+      Posts tagged "{{ .Title }}"
+    </h1>
+    
+    <section class="cf mt4">
+      {{ range .Pages }}
+        <div class="fl w-100 w-50-l pr4-l pb4">
+          <article class="bg-white ba b--black-10 br2 pa3 shadow-3">
+            <time class="f6 db gray mb2">{{ .Date.Format "January 2, 2006" }}</time>
+            
+            <h2 class="f4 fw6 lh-title mt0 mb2">
+              <a href="{{ .Permalink }}" class="link dark-gray hover-blue">
+                {{ .Title }}
+              </a>
+            </h2>
+            
+            <p class="f6 lh-copy mid-gray mv2">
+              {{ .Description }}
+            </p>
+            
+            <a href="{{ .Permalink }}" class="f6 link blue hover-dark-blue mt2 db">
+              Read more →
+            </a>
+          </article>
+        </div>
+      {{ end }}
+    </section>
+  </article>
+{{ end }}

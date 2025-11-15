@@ -1,0 +1,63 @@
+{{ define "main" }}
+  <article class="pa3 pa5-ns mw7 center fade-in">
+    {{ if .Params.featured_image }}
+      <div class="mb4">
+        {{ $imageDir := .Params.featured_image }}
+        {{ $images := readDir (printf "static%s" $imageDir) }}
+        {{ if $images }}
+          <div class="flex flex-wrap nl2 nr2">
+            {{ range first 4 $images }}
+              <div class="w-50 pa2">
+                <img src="{{ $imageDir }}{{ .Name }}" alt="{{ $.Title }}" class="w-100 br2" style="box-shadow: 0 4px 16px rgba(255, 215, 0, 0.2);" />
+              </div>
+            {{ end }}
+          </div>
+        {{ end }}
+      </div>
+    {{ end }}
+    
+    <header class="mb5">
+      <h1 class="section-title mb4">
+        {{ .Title }}
+      </h1>
+      
+      <div class="f6 mb4" style="color: var(--gold);">
+        <time>{{ .Date.Format "January 2, 2006" }}</time>
+        {{ if .Params.tags }}
+          <span class="mh2">•</span>
+          {{ range $index, $tag := .Params.tags }}
+            {{ if $index }}, {{ end }}
+            <a href="/tags/{{ $tag | urlize }}">{{ $tag }}</a>
+          {{ end }}
+        {{ end }}
+      </div>
+      
+      {{ if .Description }}
+        <p class="f5 lh-copy mb4 pb4" style="color: var(--text-secondary); border-bottom: 1px solid rgba(255, 215, 0, 0.1);">
+          {{ .Description }}
+        </p>
+      {{ end }}
+    </header>
+    
+    <div class="lh-copy f5" style="color: var(--text-secondary);">
+      {{ .Content }}
+    </div>
+    
+    {{ if .Params.tags }}
+      <div class="mt5 pt4" style="border-top: 1px solid rgba(255, 215, 0, 0.1);">
+        <h3 class="f5 fw6 mb3" style="color: var(--gold);">Tags</h3>
+        {{ range .Params.tags }}
+          <a href="/tags/{{ . | urlize }}" class="tag dib mr2 mb2">
+            {{ . }}
+          </a>
+        {{ end }}
+      </div>
+    {{ end }}
+    
+    <div class="mt5 pt4" style="border-top: 1px solid rgba(255, 215, 0, 0.1);">
+      <a href="/projects/" class="f6">
+        ← Back to Projects
+      </a>
+    </div>
+  </article>
+{{ end }}

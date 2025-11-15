@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Optimization in Laravel: A Complete Guide | IntellyGo</title>
+    <meta name="description" content="Master database query optimization in Laravel. Learn to eliminate N&#43;1 queries, use indexes effectively, and boost application performance dramatically.">
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+    
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-vh-100">
+        
+  <article class="pa3 pa5-ns mw7 center fade-in">
+    <h1 class="section-title mb4">
+      Query Optimization in Laravel: A Complete Guide
+    </h1>
+    
+    <div class="lh-copy f5" style="color: var(--text-secondary);">
+      <h2 id="query-optimization-in-laravel-a-complete-guide">Query Optimization in Laravel: A Complete Guide</h2>
+<p>Slow queries can cripple your application&rsquo;s performance. This comprehensive guide will teach you how to identify, analyze, and optimize database queries in Laravel for maximum performance.</p>
+<hr>
+<h2 id="1-the-n1-query-problem">1. The N+1 Query Problem</h2>
+<p>The N+1 problem is the most common performance issue in Laravel applications.</p>
+<h3 id="problem-example">Problem Example</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ N+1 Query Problem
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// This executes 1 query to get posts + N queries to get authors
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>(); <span style="color:#75715e">// 1 query
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($posts <span style="color:#66d9ef">as</span> $post) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">author</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>; <span style="color:#75715e">// N queries (one for each post)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Total: 1 + N queries
+</span></span></span></code></pre></div><h3 id="solution-eager-loading">Solution: Eager Loading</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ✅ Eager Loading - Only 2 queries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>(); <span style="color:#75715e">// 2 queries total
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($posts <span style="color:#66d9ef">as</span> $post) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">author</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>; <span style="color:#75715e">// No additional queries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Multiple relationships
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>([<span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;comments&#39;</span>, <span style="color:#e6db74">&#39;tags&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Nested relationships
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author.profile&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Conditional eager loading
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>([<span style="color:#e6db74">&#39;comments&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">function</span> ($query) {
+</span></span><span style="display:flex;"><span>    $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;approved&#39;</span>, <span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">orderBy</span>(<span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;desc&#39;</span>)
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">limit</span>(<span style="color:#ae81ff">10</span>);
+</span></span><span style="display:flex;"><span>}])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span></code></pre></div><h3 id="lazy-eager-loading">Lazy Eager Loading</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// When you forgot to eager load
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Load relationships after the fact
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">load</span>(<span style="color:#e6db74">&#39;author&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Load if not already loaded
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">loadMissing</span>(<span style="color:#e6db74">&#39;comments&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Load count without loading all data
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">loadCount</span>(<span style="color:#e6db74">&#39;comments&#39;</span>);
+</span></span></code></pre></div><hr>
+<h2 id="2-select-only-required-columns">2. Select Only Required Columns</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ Fetching all columns (inefficient)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Select only needed columns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;name&#39;</span>, <span style="color:#e6db74">&#39;email&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Add columns later if needed
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;name&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">addSelect</span>(<span style="color:#e6db74">&#39;email&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ With relationships
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;user_id&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author:id,name,email&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Exclude columns
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;*&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">selectRaw</span>(<span style="color:#e6db74">&#39;DATE(created_at) as date&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span></code></pre></div><hr>
+<h2 id="3-database-indexing">3. Database Indexing</h2>
+<h3 id="creating-indexes">Creating Indexes</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Migration
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Schema</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>(<span style="color:#e6db74">&#39;posts&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Blueprint</span> $table) {
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>();
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">string</span>(<span style="color:#e6db74">&#39;title&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">text</span>(<span style="color:#e6db74">&#39;content&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">foreignId</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">string</span>(<span style="color:#e6db74">&#39;status&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">timestamp</span>(<span style="color:#e6db74">&#39;published_at&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">nullable</span>();
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">timestamps</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ✅ Single column indexes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>(<span style="color:#e6db74">&#39;status&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>(<span style="color:#e6db74">&#39;published_at&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ✅ Composite indexes (order matters!)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>([<span style="color:#e6db74">&#39;user_id&#39;</span>, <span style="color:#e6db74">&#39;status&#39;</span>]);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>([<span style="color:#e6db74">&#39;status&#39;</span>, <span style="color:#e6db74">&#39;published_at&#39;</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ✅ Unique indexes
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">unique</span>(<span style="color:#e6db74">&#39;slug&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ✅ Full-text indexes (MySQL 5.7+)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">fullText</span>([<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>]);
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Add index to existing table
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Schema</span><span style="color:#f92672">::</span><span style="color:#a6e22e">table</span>(<span style="color:#e6db74">&#39;posts&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Blueprint</span> $table) {
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">index</span>(<span style="color:#e6db74">&#39;category_id&#39;</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="when-to-use-indexes">When to Use Indexes</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ✅ Good candidates for indexing:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Foreign keys
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Columns in WHERE clauses
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Columns in ORDER BY
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Columns in JOIN conditions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Columns frequently searched
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ❌ Don&#39;t index:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Small tables (&lt; 1000 rows)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Columns with low cardinality (few unique values)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Columns that are frequently updated
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// - Very large text columns
+</span></span></span></code></pre></div><h3 id="using-full-text-search">Using Full-Text Search</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Migration with full-text index
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Schema</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>(<span style="color:#e6db74">&#39;articles&#39;</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">Blueprint</span> $table) {
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>();
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">string</span>(<span style="color:#e6db74">&#39;title&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">text</span>(<span style="color:#e6db74">&#39;content&#39;</span>);
+</span></span><span style="display:flex;"><span>    $table<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">fullText</span>([<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>]);
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Full-text search query
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$articles <span style="color:#f92672">=</span> <span style="color:#a6e22e">Article</span><span style="color:#f92672">::</span><span style="color:#a6e22e">whereFullText</span>([<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>], <span style="color:#e6db74">&#39;laravel optimization&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Boolean mode for advanced searches
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$articles <span style="color:#f92672">=</span> <span style="color:#a6e22e">Article</span><span style="color:#f92672">::</span><span style="color:#a6e22e">whereFullText</span>(
+</span></span><span style="display:flex;"><span>    [<span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;content&#39;</span>],
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;+laravel +optimization -tutorial&#39;</span>,
+</span></span><span style="display:flex;"><span>    [<span style="color:#e6db74">&#39;mode&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;boolean&#39;</span>]
+</span></span><span style="display:flex;"><span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span></code></pre></div><hr>
+<h2 id="4-query-optimization-techniques">4. Query Optimization Techniques</h2>
+<h3 id="chunking-large-datasets">Chunking Large Datasets</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ Memory intensive for large datasets
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>(); <span style="color:#75715e">// Loads all users into memory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Process in chunks
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">chunk</span>(<span style="color:#ae81ff">1000</span>, <span style="color:#66d9ef">function</span> ($users) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">foreach</span> ($users <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Process user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">processUser</span>($user);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Chunk by ID (better for tables with deletions)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">chunkById</span>(<span style="color:#ae81ff">1000</span>, <span style="color:#66d9ef">function</span> ($users) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">foreach</span> ($users <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">processUser</span>($user);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Lazy collections (memory efficient)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">lazy</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">each</span>(<span style="color:#66d9ef">function</span> ($user) {
+</span></span><span style="display:flex;"><span>    $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">processUser</span>($user);
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Cursor (memory efficient for single loop)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">foreach</span> (<span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">cursor</span>() <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>    $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">processUser</span>($user);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="efficient-counting">Efficient Counting</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ Loads all records to count
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$count <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Database-level counting
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$count <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">count</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Count with conditions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$publishedCount <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;status&#39;</span>, <span style="color:#e6db74">&#39;published&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Count relationships without loading
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">withCount</span>(<span style="color:#e6db74">&#39;posts&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($users <span style="color:#66d9ef">as</span> $user) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">posts_count</span>; <span style="color:#75715e">// No additional query
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Multiple counts
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">withCount</span>([<span style="color:#e6db74">&#39;posts&#39;</span>, <span style="color:#e6db74">&#39;comments&#39;</span>, <span style="color:#e6db74">&#39;likes&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Conditional counts
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">withCount</span>([
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;posts&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">fn</span> ($query) <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;published&#39;</span>, <span style="color:#66d9ef">true</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;posts as draft_posts_count&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">fn</span> ($query) <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;published&#39;</span>, <span style="color:#66d9ef">false</span>),
+</span></span><span style="display:flex;"><span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span></code></pre></div><h3 id="exists-vs-count">Exists vs Count</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ❌ Inefficient when you just need to know if records exist
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>, $userId)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Do something
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Use exists() - stops after first match
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>, $userId)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">exists</span>()) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Do something
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Or doesntExist()
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>, $userId)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">doesntExist</span>()) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Do something
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><hr>
+<h2 id="5-query-caching">5. Query Caching</h2>
+<h3 id="basic-caching">Basic Caching</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> <span style="color:#a6e22e">Illuminate\Support\Facades\Cache</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Cache query results
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">remember</span>(<span style="color:#e6db74">&#39;users.all&#39;</span>, <span style="color:#ae81ff">3600</span>, <span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;profile&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Cache with tags (Redis/Memcached only)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#39;posts&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">remember</span>(<span style="color:#e6db74">&#39;posts.recent&#39;</span>, <span style="color:#ae81ff">3600</span>, <span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;published&#39;</span>, <span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">latest</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">take</span>(<span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Clear tagged cache
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#39;posts&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">flush</span>();
+</span></span></code></pre></div><h3 id="advanced-caching-strategies">Advanced Caching Strategies</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostRepository</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getPopularPosts</span>(<span style="color:#a6e22e">int</span> $limit <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>)<span style="color:#f92672">:</span> <span style="color:#a6e22e">Collection</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $cacheKey <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;posts.popular.</span><span style="color:#e6db74">{</span>$limit<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">remember</span>($cacheKey, <span style="color:#ae81ff">3600</span>, <span style="color:#66d9ef">function</span> () <span style="color:#66d9ef">use</span> ($limit) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;posts.*&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">withCount</span>(<span style="color:#e6db74">&#39;likes&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">orderBy</span>(<span style="color:#e6db74">&#39;likes_count&#39;</span>, <span style="color:#e6db74">&#39;desc&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">limit</span>($limit)
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">clearCache</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#39;posts&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">flush</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getPost</span>(<span style="color:#a6e22e">int</span> $id)<span style="color:#f92672">:</span> <span style="color:#f92672">?</span><span style="color:#a6e22e">Post</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Per-item caching
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">remember</span>(<span style="color:#e6db74">&#34;post.</span><span style="color:#e6db74">{</span>$id<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, <span style="color:#ae81ff">3600</span>, <span style="color:#66d9ef">function</span> () <span style="color:#66d9ef">use</span> ($id) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>([<span style="color:#e6db74">&#39;author&#39;</span>, <span style="color:#e6db74">&#39;tags&#39;</span>, <span style="color:#e6db74">&#39;comments&#39;</span>])
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">find</span>($id);
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Observer to invalidate cache
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PostObserver</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">saved</span>(<span style="color:#a6e22e">Post</span> $post)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">forget</span>(<span style="color:#e6db74">&#34;post.</span><span style="color:#e6db74">{</span>$post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#39;posts&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">flush</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">deleted</span>(<span style="color:#a6e22e">Post</span> $post)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">forget</span>(<span style="color:#e6db74">&#34;post.</span><span style="color:#e6db74">{</span>$post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">tags</span>([<span style="color:#e6db74">&#39;posts&#39;</span>])<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">flush</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="6-raw-queries--subqueries">6. Raw Queries &amp; Subqueries</h2>
+<h3 id="when-to-use-raw-queries">When to Use Raw Queries</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ✅ Complex aggregations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$stats <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">table</span>(<span style="color:#e6db74">&#39;orders&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">selectRaw</span>(<span style="color:#e6db74">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        DATE(created_at) as date,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        COUNT(*) as total_orders,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        SUM(amount) as total_revenue,
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        AVG(amount) as avg_order_value
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;status&#39;</span>, <span style="color:#e6db74">&#39;completed&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">groupBy</span>(<span style="color:#e6db74">&#39;date&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Subqueries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$latestPosts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;posts.*&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">selectSub</span>(<span style="color:#66d9ef">function</span> ($query) {
+</span></span><span style="display:flex;"><span>        $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">selectRaw</span>(<span style="color:#e6db74">&#39;COUNT(*)&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">from</span>(<span style="color:#e6db74">&#39;comments&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">whereColumn</span>(<span style="color:#e6db74">&#39;comments.post_id&#39;</span>, <span style="color:#e6db74">&#39;posts.id&#39;</span>);
+</span></span><span style="display:flex;"><span>    }, <span style="color:#e6db74">&#39;comments_count&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">having</span>(<span style="color:#e6db74">&#39;comments_count&#39;</span>, <span style="color:#e6db74">&#39;&gt;&#39;</span>, <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Join with subquery
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;users.*&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">joinSub</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">selectRaw</span>(<span style="color:#e6db74">&#39;COUNT(*) as post_count&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">groupBy</span>(<span style="color:#e6db74">&#39;user_id&#39;</span>),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;post_stats&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;users.id&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;=&#39;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;post_stats.user_id&#39;</span>
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;post_stats.post_count&#39;</span>, <span style="color:#e6db74">&#39;&gt;&#39;</span>, <span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span></code></pre></div><hr>
+<h2 id="7-debugging--monitoring-queries">7. Debugging &amp; Monitoring Queries</h2>
+<h3 id="query-logging">Query Logging</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Enable query log
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">enableQueryLog</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Your queries here
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$users <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;posts&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Get executed queries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$queries <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">getQueryLog</span>();
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">dd</span>($queries);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Custom query logger
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">listen</span>(<span style="color:#66d9ef">function</span> ($query) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">info</span>(<span style="color:#e6db74">&#39;Query executed&#39;</span>, [
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;sql&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">sql</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;bindings&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bindings</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;time&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">time</span>,
+</span></span><span style="display:flex;"><span>    ]);
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><h3 id="slow-query-detection">Slow Query Detection</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// AppServiceProvider
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">whenQueryingForLongerThan</span>(<span style="color:#ae81ff">500</span>, <span style="color:#66d9ef">function</span> ($connection, $event) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">warning</span>(<span style="color:#e6db74">&#39;Slow query detected&#39;</span>, [
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;sql&#39;</span> <span style="color:#f92672">=&gt;</span> $event<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">sql</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;bindings&#39;</span> <span style="color:#f92672">=&gt;</span> $event<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bindings</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;time&#39;</span> <span style="color:#f92672">=&gt;</span> $event<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">time</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;connection&#39;</span> <span style="color:#f92672">=&gt;</span> $connection<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getName</span>(),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="explain-query-plans">Explain Query Plans</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Get query explanation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$query <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">where</span>(<span style="color:#e6db74">&#39;published&#39;</span>, <span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">orderBy</span>(<span style="color:#e6db74">&#39;created_at&#39;</span>, <span style="color:#e6db74">&#39;desc&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// View SQL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">dd</span>($query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">toSql</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// View bindings
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">dd</span>($query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getBindings</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Explain query
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">enableQueryLog</span>();
+</span></span><span style="display:flex;"><span>$query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>$queries <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">getQueryLog</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($queries <span style="color:#66d9ef">as</span> $query) {
+</span></span><span style="display:flex;"><span>    $explained <span style="color:#f92672">=</span> <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;EXPLAIN &#39;</span> <span style="color:#f92672">.</span> $query[<span style="color:#e6db74">&#39;query&#39;</span>], $query[<span style="color:#e6db74">&#39;bindings&#39;</span>]);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">dd</span>($explained);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="8-optimization-best-practices">8. Optimization Best Practices</h2>
+<h3 id="summary-checklist">Summary Checklist</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ✅ DO:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">✓</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">eager</span> <span style="color:#a6e22e">loading</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">prevent</span> <span style="color:#a6e22e">N</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1</span> <span style="color:#a6e22e">queries</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#a6e22e">Select</span> <span style="color:#a6e22e">only</span> <span style="color:#a6e22e">required</span> <span style="color:#a6e22e">columns</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#a6e22e">Add</span> <span style="color:#a6e22e">indexes</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">frequently</span> <span style="color:#a6e22e">queried</span> <span style="color:#a6e22e">columns</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">chunk</span>() <span style="color:#66d9ef">or</span> <span style="color:#a6e22e">cursor</span>() <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">large</span> <span style="color:#a6e22e">datasets</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#a6e22e">Cache</span> <span style="color:#a6e22e">expensive</span> <span style="color:#a6e22e">queries</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">exists</span>() <span style="color:#a6e22e">instead</span> <span style="color:#a6e22e">of</span> <span style="color:#a6e22e">count</span>() <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">whereHas</span>() <span style="color:#a6e22e">with</span> <span style="color:#a6e22e">caution</span> (<span style="color:#a6e22e">can</span> <span style="color:#a6e22e">be</span> <span style="color:#a6e22e">slow</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#a6e22e">Monitor</span> <span style="color:#a6e22e">slow</span> <span style="color:#a6e22e">queries</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✓</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">database</span> <span style="color:#a6e22e">transactions</span> <span style="color:#a6e22e">appropriately</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ❌ DON&#39;T:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">✗</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">all</span>() <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">large</span> <span style="color:#a6e22e">tables</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✗</span> <span style="color:#a6e22e">Perform</span> <span style="color:#a6e22e">queries</span> <span style="color:#a6e22e">in</span> <span style="color:#a6e22e">loops</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✗</span> <span style="color:#a6e22e">Forget</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">index</span> <span style="color:#a6e22e">foreign</span> <span style="color:#a6e22e">keys</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✗</span> <span style="color:#a6e22e">Over</span><span style="color:#f92672">-</span><span style="color:#a6e22e">index</span> (<span style="color:#a6e22e">slows</span> <span style="color:#a6e22e">down</span> <span style="color:#a6e22e">writes</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✗</span> <span style="color:#66d9ef">Use</span> <span style="color:#a6e22e">select</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">when</span> <span style="color:#a6e22e">you</span> <span style="color:#a6e22e">don</span><span style="color:#960050;background-color:#1e0010">&#39;</span><span style="color:#a6e22e">t</span> <span style="color:#a6e22e">need</span> <span style="color:#a6e22e">all</span> <span style="color:#a6e22e">columns</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✗</span> <span style="color:#a6e22e">Ignore</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">explain</span> <span style="color:#a6e22e">output</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">✗</span> <span style="color:#a6e22e">Cache</span> <span style="color:#a6e22e">data</span> <span style="color:#a6e22e">indefinitely</span>
+</span></span></code></pre></div><h3 id="performance-comparison">Performance Comparison</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Scenario: Get 1000 posts with authors and comments
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ❌ Worst: N+1 queries (2001 queries!)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">all</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($posts <span style="color:#66d9ef">as</span> $post) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">author</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">comments</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ⚠️ Better: Partial eager loading (1001 queries)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($posts <span style="color:#66d9ef">as</span> $post) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">author</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">comments</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">count</span>(); <span style="color:#75715e">// Still N+1 for comments
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ✅ Best: Full eager loading with count (3 queries)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">withCount</span>(<span style="color:#e6db74">&#39;comments&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">foreach</span> ($posts <span style="color:#66d9ef">as</span> $post) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">author</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">name</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">echo</span> $post<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">comments_count</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 🚀 Optimal: Cached (0-3 queries depending on cache status)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$posts <span style="color:#f92672">=</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">remember</span>(<span style="color:#e6db74">&#39;posts.with.stats&#39;</span>, <span style="color:#ae81ff">3600</span>, <span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Post</span><span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#e6db74">&#39;id&#39;</span>, <span style="color:#e6db74">&#39;title&#39;</span>, <span style="color:#e6db74">&#39;user_id&#39;</span>, <span style="color:#e6db74">&#39;created_at&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">with</span>(<span style="color:#e6db74">&#39;author:id,name&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">withCount</span>(<span style="color:#e6db74">&#39;comments&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>();
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>Query optimization is crucial for scalable Laravel applications. Start by identifying N+1 queries, add appropriate indexes, and implement caching where beneficial. Monitor your queries regularly and optimize as your application grows.</p>
+<p><strong>Remember: Premature optimization is the root of all evil, but ignoring obvious performance issues is worse.</strong></p>
+
+    </div>
+  </article>
+
+    </main>
+
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

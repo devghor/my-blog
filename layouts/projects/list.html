@@ -1,0 +1,58 @@
+{{ define "main" }}
+  <article class="pa3 pa5-ns mw8 center fade-in">
+    <h1 class="section-title mb4">
+      {{ .Title }}
+    </h1>
+    
+    <div class="mb5" style="color: var(--text-secondary);">
+      {{ .Content }}
+    </div>
+    
+    <section class="flex flex-wrap nl3 nr3">
+      {{ range .Pages.ByWeight }}
+        <div class="w-100 w-50-l pa3 scroll-reveal">
+          <article class="card h-100 flex flex-column">
+            {{ if .Params.featured_image }}
+              <div class="aspect-ratio aspect-ratio--16x9 mb3 overflow-hidden br2">
+                {{ $imageDir := .Params.featured_image }}
+                {{ $images := readDir (printf "static%s" $imageDir) }}
+                {{ if $images }}
+                  {{ $firstImage := index $images 0 }}
+                  <img src="{{ $imageDir }}{{ $firstImage.Name }}" alt="{{ .Title }}" class="aspect-ratio--object cover" style="object-fit: cover;" />
+                {{ else }}
+                  <div class="aspect-ratio--object cover" style="background: linear-gradient(135deg, var(--gold-dark), var(--gold));"></div>
+                {{ end }}
+              </div>
+            {{ else }}
+              <div class="aspect-ratio aspect-ratio--16x9 mb3">
+                <div class="aspect-ratio--object cover" style="background: linear-gradient(135deg, var(--gold-dark), var(--gold));"></div>
+              </div>
+            {{ end }}
+            
+            <h2 class="f4 fw6 lh-title mt0 mb3">
+              <a href="{{ .Permalink }}" style="color: var(--text-primary);">
+                {{ .Title }}
+              </a>
+            </h2>
+            
+            <p class="f6 lh-copy mb3 flex-auto" style="color: var(--text-secondary);">
+              {{ .Description }}
+            </p>
+            
+            {{ if .Params.tags }}
+              <div class="mb3">
+                {{ range .Params.tags }}
+                  <span class="tag dib mr2 mb2">{{ . }}</span>
+                {{ end }}
+              </div>
+            {{ end }}
+            
+            <a href="{{ .Permalink }}" class="f6 db">
+              View Details →
+            </a>
+          </article>
+        </div>
+      {{ end }}
+    </section>
+  </article>
+{{ end }}

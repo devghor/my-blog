@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=59620&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOLID Design Patterns in Laravel: Building Maintainable Applications | IntellyGo</title>
+    <meta name="description" content="Master SOLID principles in Laravel to write clean, maintainable, and scalable code. Learn practical implementations with real-world examples.">
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+    
+    <style>
+        :root {
+            --dark-bg: #0a0e27;
+            --darker-bg: #050816;
+            --card-bg: #151b3d;
+            --gold: #FFD700;
+            --gold-light: #FFF4B8;
+            --gold-dark: #B8860B;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+         
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+        
+         
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+        
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--gold);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+         
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+        
+         
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+         
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--darker-bg);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+         
+        .tag {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+         
+        a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+        
+         
+        .section-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            border-radius: 2px;
+        }
+        
+         
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+         
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+         
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+         
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <header class="w-100 ph3 pv3 ph5-l pv4-l">
+        <nav class="flex justify-between items-center mw8 center">
+            <a href="/" class="logo">IntellyGo</a>
+            <div class="flex items-center">
+                
+                    <a href="/" class="nav-link">Home</a>
+                
+                    <a href="/posts/" class="nav-link">Blog</a>
+                
+                    <a href="/about/" class="nav-link">About</a>
+                
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-vh-100">
+        
+  <article class="pa3 pa5-ns mw7 center fade-in">
+    <h1 class="section-title mb4">
+      SOLID Design Patterns in Laravel: Building Maintainable Applications
+    </h1>
+    
+    <div class="lh-copy f5" style="color: var(--text-secondary);">
+      <h2 id="solid-design-patterns-in-laravel-building-maintainable-applications">SOLID Design Patterns in Laravel: Building Maintainable Applications</h2>
+<p>SOLID principles are the foundation of clean, maintainable code. In this comprehensive guide, we&rsquo;ll explore how to apply each SOLID principle in Laravel applications with practical examples.</p>
+<hr>
+<h2 id="what-is-solid">What is SOLID?</h2>
+<p>SOLID is an acronym for five design principles that help developers create more maintainable and scalable software:</p>
+<ul>
+<li><strong>S</strong> - Single Responsibility Principle</li>
+<li><strong>O</strong> - Open/Closed Principle</li>
+<li><strong>L</strong> - Liskov Substitution Principle</li>
+<li><strong>I</strong> - Interface Segregation Principle</li>
+<li><strong>D</strong> - Dependency Inversion Principle</li>
+</ul>
+<hr>
+<h2 id="1-single-responsibility-principle-srp">1. Single Responsibility Principle (SRP)</h2>
+<p><strong>Definition:</strong> A class should have only one reason to change, meaning it should have only one job or responsibility.</p>
+<h3 id="-bad-example">❌ Bad Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserController</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Validation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $validated <span style="color:#f92672">=</span> $request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validate</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;name&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;required|string&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;required|email|unique:users&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">&#39;required|min:8&#39;</span>,
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Create user
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $user <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;name&#39;</span> <span style="color:#f92672">=&gt;</span> $validated[<span style="color:#e6db74">&#39;name&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> $validated[<span style="color:#e6db74">&#39;email&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">Hash</span><span style="color:#f92672">::</span><span style="color:#a6e22e">make</span>($validated[<span style="color:#e6db74">&#39;password&#39;</span>]),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Send welcome email
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Mail</span><span style="color:#f92672">::</span><span style="color:#a6e22e">to</span>($user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">send</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">WelcomeMail</span>($user));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Log activity
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">info</span>(<span style="color:#e6db74">&#39;New user registered&#39;</span>, [<span style="color:#e6db74">&#39;user_id&#39;</span> <span style="color:#f92672">=&gt;</span> $user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>($user, <span style="color:#ae81ff">201</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="-good-example">✅ Good Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Controller - handles HTTP requests only
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserController</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">UserService</span> $userService
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">StoreUserRequest</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">userService</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">createUser</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validated</span>());
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">UserResource</span>($user);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Service - handles business logic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">UserRepository</span> $userRepository,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">NotificationService</span> $notificationService,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">ActivityLogger</span> $activityLogger
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">createUser</span>(<span style="color:#66d9ef">array</span> $data)<span style="color:#f92672">:</span> <span style="color:#a6e22e">User</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">userRepository</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">create</span>([
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;name&#39;</span> <span style="color:#f92672">=&gt;</span> $data[<span style="color:#e6db74">&#39;name&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;email&#39;</span> <span style="color:#f92672">=&gt;</span> $data[<span style="color:#e6db74">&#39;email&#39;</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;password&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">Hash</span><span style="color:#f92672">::</span><span style="color:#a6e22e">make</span>($data[<span style="color:#e6db74">&#39;password&#39;</span>]),
+</span></span><span style="display:flex;"><span>        ]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">notificationService</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">sendWelcomeEmail</span>($user);
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">activityLogger</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">logUserRegistration</span>($user);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $user;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="2-openclosed-principle-ocp">2. Open/Closed Principle (OCP)</h2>
+<p><strong>Definition:</strong> Software entities should be open for extension but closed for modification.</p>
+<h3 id="-good-example-using-strategy-pattern">✅ Good Example Using Strategy Pattern:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Payment processor interface
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">PaymentProcessorInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">process</span>(<span style="color:#a6e22e">Order</span> $order)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PaymentResult</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete implementations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StripePaymentProcessor</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">PaymentProcessorInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">process</span>(<span style="color:#a6e22e">Order</span> $order)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PaymentResult</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Stripe-specific payment logic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">PaymentResult</span>(<span style="color:#66d9ef">true</span>, <span style="color:#e6db74">&#39;stripe_transaction_id&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PayPalPaymentProcessor</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">PaymentProcessorInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">process</span>(<span style="color:#a6e22e">Order</span> $order)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PaymentResult</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// PayPal-specific payment logic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">PaymentResult</span>(<span style="color:#66d9ef">true</span>, <span style="color:#e6db74">&#39;paypal_transaction_id&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CryptoPaymentProcessor</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">PaymentProcessorInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">process</span>(<span style="color:#a6e22e">Order</span> $order)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PaymentResult</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Crypto-specific payment logic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">PaymentResult</span>(<span style="color:#66d9ef">true</span>, <span style="color:#e6db74">&#39;crypto_transaction_id&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Payment service - open for extension, closed for modification
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PaymentService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">PaymentProcessorInterface</span> $processor
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">processPayment</span>(<span style="color:#a6e22e">Order</span> $order)<span style="color:#f92672">:</span> <span style="color:#a6e22e">PaymentResult</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">processor</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">process</span>($order);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Usage in controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">processPayment</span>(<span style="color:#a6e22e">Request</span> $request, <span style="color:#a6e22e">Order</span> $order)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    $processor <span style="color:#f92672">=</span> <span style="color:#a6e22e">match</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">payment_method</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;stripe&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">StripePaymentProcessor</span>(),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;paypal&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">PayPalPaymentProcessor</span>(),
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;crypto&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">CryptoPaymentProcessor</span>(),
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    $paymentService <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">PaymentService</span>($processor);
+</span></span><span style="display:flex;"><span>    $result <span style="color:#f92672">=</span> $paymentService<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">processPayment</span>($order);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>($result);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="3-liskov-substitution-principle-lsp">3. Liskov Substitution Principle (LSP)</h2>
+<p><strong>Definition:</strong> Objects of a superclass should be replaceable with objects of its subclasses without breaking the application.</p>
+<h3 id="-good-example-1">✅ Good Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StorageDriver</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">string</span> $path, <span style="color:#a6e22e">string</span> $content)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">retrieve</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#f92672">?</span><span style="color:#a6e22e">string</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">delete</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LocalStorageDriver</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">StorageDriver</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">string</span> $path, <span style="color:#a6e22e">string</span> $content)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;local&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">put</span>($path, $content);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">retrieve</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#f92672">?</span><span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;local&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>($path);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">delete</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;local&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">delete</span>($path);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">S3StorageDriver</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">StorageDriver</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">string</span> $path, <span style="color:#a6e22e">string</span> $content)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;s3&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">put</span>($path, $content);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">retrieve</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#f92672">?</span><span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;s3&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">get</span>($path);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">delete</span>(<span style="color:#a6e22e">string</span> $path)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Storage</span><span style="color:#f92672">::</span><span style="color:#a6e22e">disk</span>(<span style="color:#e6db74">&#39;s3&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">delete</span>($path);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Service using storage - works with any StorageDriver implementation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FileService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">StorageDriver</span> $storage
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">uploadFile</span>(<span style="color:#a6e22e">UploadedFile</span> $file)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;uploads/&#39;</span> <span style="color:#f92672">.</span> $file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">hashName</span>();
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">storage</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">store</span>($path, $file<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getContent</span>());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $path;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="4-interface-segregation-principle-isp">4. Interface Segregation Principle (ISP)</h2>
+<p><strong>Definition:</strong> Clients should not be forced to depend on interfaces they don&rsquo;t use.</p>
+<h3 id="-bad-example-1">❌ Bad Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">EmployeeInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">work</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">eat</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">calculateSalary</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">float</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">manageTeam</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Problem: Regular employees don&#39;t manage teams
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RegularEmployee</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">EmployeeInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">work</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">eat</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">calculateSalary</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">float</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Forced to implement this even though it doesn&#39;t apply
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">manageTeam</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> 
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">&#39;Not applicable&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="-good-example-2">✅ Good Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">WorkableInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">work</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">EatableInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">eat</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">SalaryCalculableInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">calculateSalary</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">float</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ManageableInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">manageTeam</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RegularEmployee</span> <span style="color:#66d9ef">implements</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">WorkableInterface</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">EatableInterface</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">SalaryCalculableInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">work</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">eat</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">calculateSalary</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">float</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Manager</span> <span style="color:#66d9ef">implements</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">WorkableInterface</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">EatableInterface</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">SalaryCalculableInterface</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">ManageableInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">work</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">eat</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">calculateSalary</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">float</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">manageTeam</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span> { <span style="color:#75715e">/* ... */</span> }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="5-dependency-inversion-principle-dip">5. Dependency Inversion Principle (DIP)</h2>
+<p><strong>Definition:</strong> High-level modules should not depend on low-level modules. Both should depend on abstractions.</p>
+<h3 id="-bad-example-2">❌ Bad Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserController</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Direct dependency on concrete class
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        $logger <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">FileLogger</span>();
+</span></span><span style="display:flex;"><span>        $cache <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">RedisCache</span>();
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">all</span>());
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        $logger<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;User created&#39;</span>);
+</span></span><span style="display:flex;"><span>        $cache<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;user:</span><span style="color:#e6db74">{</span>$user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, $user);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">json</span>($user);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="-good-example-3">✅ Good Example:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Abstractions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">LoggerInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">CacheInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">put</span>(<span style="color:#a6e22e">string</span> $key, <span style="color:#a6e22e">mixed</span> $value)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">get</span>(<span style="color:#a6e22e">string</span> $key)<span style="color:#f92672">:</span> <span style="color:#a6e22e">mixed</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete implementations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FileLogger</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">LoggerInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">info</span>($message);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">RedisCache</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">CacheInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">put</span>(<span style="color:#a6e22e">string</span> $key, <span style="color:#a6e22e">mixed</span> $value)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">put</span>($key, $value);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">get</span>(<span style="color:#a6e22e">string</span> $key)<span style="color:#f92672">:</span> <span style="color:#a6e22e">mixed</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Cache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">get</span>($key);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Service depending on abstractions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">LoggerInterface</span> $logger,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">CacheInterface</span> $cache
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">createUser</span>(<span style="color:#66d9ef">array</span> $data)<span style="color:#f92672">:</span> <span style="color:#a6e22e">User</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> <span style="color:#a6e22e">User</span><span style="color:#f92672">::</span><span style="color:#a6e22e">create</span>($data);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">logger</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;User created: </span><span style="color:#e6db74">{</span>$user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">cache</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">put</span>(<span style="color:#e6db74">&#34;user:</span><span style="color:#e6db74">{</span>$user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, $user);
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> $user;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Controller with dependency injection
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserController</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">UserService</span> $userService
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">Request</span> $request)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $user <span style="color:#f92672">=</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">userService</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">createUser</span>($request<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">validated</span>());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">UserResource</span>($user);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Service Provider binding
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AppServiceProvider</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">ServiceProvider</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">register</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">app</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bind</span>(<span style="color:#a6e22e">LoggerInterface</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#a6e22e">FileLogger</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">app</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">bind</span>(<span style="color:#a6e22e">CacheInterface</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#a6e22e">RedisCache</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h2 id="practical-implementation-complete-example">Practical Implementation: Complete Example</h2>
+<p>Let&rsquo;s build a notification system using all SOLID principles:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// Interfaces
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">NotificationChannelInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">NotificationFormatterInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">format</span>(<span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete implementations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">EmailNotificationChannel</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">NotificationChannelInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Mail</span><span style="color:#f92672">::</span><span style="color:#a6e22e">to</span>($user<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">email</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">send</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">GenericNotification</span>($message));
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SmsNotificationChannel</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">NotificationChannelInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// SMS sending logic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PushNotificationChannel</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">NotificationChannelInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">send</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">bool</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Push notification logic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Formatter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HtmlFormatter</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">NotificationFormatterInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">format</span>(<span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&lt;p&gt;</span><span style="color:#e6db74">{</span>$message<span style="color:#e6db74">}</span><span style="color:#e6db74">&lt;/p&gt;&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PlainTextFormatter</span> <span style="color:#66d9ef">implements</span> <span style="color:#a6e22e">NotificationFormatterInterface</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">format</span>(<span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">strip_tags</span>($message);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Service
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">NotificationService</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">array</span> $channels,
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">private</span> <span style="color:#a6e22e">NotificationFormatterInterface</span> $formatter
+</span></span><span style="display:flex;"><span>    ) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">notify</span>(<span style="color:#a6e22e">User</span> $user, <span style="color:#a6e22e">string</span> $message)<span style="color:#f92672">:</span> <span style="color:#a6e22e">void</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $formattedMessage <span style="color:#f92672">=</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">formatter</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">format</span>($message);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">foreach</span> ($this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">channels</span> <span style="color:#66d9ef">as</span> $channel) {
+</span></span><span style="display:flex;"><span>            $channel<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">send</span>($user, $formattedMessage);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Usage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$notificationService <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">NotificationService</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">channels</span><span style="color:#f92672">:</span> [
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">EmailNotificationChannel</span>(),
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">SmsNotificationChannel</span>(),
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">formatter</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">HtmlFormatter</span>()
+</span></span><span style="display:flex;"><span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$notificationService<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">notify</span>($user, <span style="color:#e6db74">&#39;Welcome to our platform!&#39;</span>);
+</span></span></code></pre></div><hr>
+<h2 id="benefits-of-solid-in-laravel">Benefits of SOLID in Laravel</h2>
+<ol>
+<li><strong>Maintainability</strong> - Code is easier to understand and modify</li>
+<li><strong>Testability</strong> - Components can be tested in isolation</li>
+<li><strong>Scalability</strong> - Easy to add new features without breaking existing code</li>
+<li><strong>Flexibility</strong> - Swap implementations without changing dependent code</li>
+<li><strong>Reusability</strong> - Components can be reused across the application</li>
+</ol>
+<hr>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Use Laravel&rsquo;s Service Container</strong> - Leverage dependency injection</li>
+<li><strong>Create dedicated Service classes</strong> - Keep controllers thin</li>
+<li><strong>Use Form Requests</strong> - Validate data outside controllers</li>
+<li><strong>Implement Repository Pattern</strong> - Abstract data access layer</li>
+<li><strong>Use Action classes</strong> - Single-purpose business logic</li>
+<li><strong>Write Interfaces</strong> - Define contracts for your implementations</li>
+</ol>
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>SOLID principles aren&rsquo;t just theoretical concepts—they&rsquo;re practical guidelines that lead to better Laravel applications. Start small, refactor incrementally, and you&rsquo;ll see significant improvements in code quality and maintainability.</p>
+<p>Remember: <strong>Good design is not about following rules blindly, but understanding when and how to apply them effectively.</strong></p>
+
+    </div>
+  </article>
+
+    </main>
+
+    <footer class="w-100 ph3 pv5 ph5-l mt5">
+        <div class="mw8 center">
+            <div class="flex flex-wrap justify-between mb4">
+                <div class="w-100 w-50-l mb4 mb0-l">
+                    <h3 class="f4 fw6 mb3" style="color: var(--gold);">Hafijur Rahman</h3>
+                    <p class="f6 lh-copy" style="color: var(--text-secondary);">SaaS &amp; HRIS Specialist | Laravel &amp; PHP Expert | System Design Enthusiast</p>
+                </div>
+                <div class="w-100 w-50-l tr-l">
+                    
+                        <a href="https://github.com/devghor" class="mr3" target="_blank">GitHub</a>
+                    
+                    
+                        <a href="https://linkedin.com/in/hafijur-rahaman" target="_blank">LinkedIn</a>
+                    
+                </div>
+            </div>
+            <div class="bt pt3 tc" style="border-color: rgba(255, 215, 0, 0.1);">
+                <p class="f6" style="color: var(--text-secondary);">© 2025 Hafijur Rahman. Built with Hugo.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

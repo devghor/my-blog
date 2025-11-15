@@ -2,10 +2,221 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on IntellyGo</title>
-    <link>https://intellygo.com/tags/</link>
+    <link>http://localhost:59620/tags/</link>
     <description>Recent content in Tags on IntellyGo</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <atom:link href="https://intellygo.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 12 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:59620/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Architecture</title>
+      <link>http://localhost:59620/tags/architecture/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/architecture/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Design Patterns</title>
+      <link>http://localhost:59620/tags/design-patterns/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/design-patterns/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Laravel</title>
+      <link>http://localhost:59620/tags/laravel/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/laravel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>PHP</title>
+      <link>http://localhost:59620/tags/php/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/php/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>SOLID</title>
+      <link>http://localhost:59620/tags/solid/</link>
+      <pubDate>Tue, 12 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/solid/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Optimization</title>
+      <link>http://localhost:59620/tags/optimization/</link>
+      <pubDate>Fri, 08 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/optimization/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Performance</title>
+      <link>http://localhost:59620/tags/performance/</link>
+      <pubDate>Fri, 08 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/performance/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Scalability</title>
+      <link>http://localhost:59620/tags/scalability/</link>
+      <pubDate>Fri, 08 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/scalability/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Alpine.js</title>
+      <link>http://localhost:59620/tags/alpine.js/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/alpine.js/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Banking</title>
+      <link>http://localhost:59620/tags/banking/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/banking/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Best Practices</title>
+      <link>http://localhost:59620/tags/best-practices/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/best-practices/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Financial Services</title>
+      <link>http://localhost:59620/tags/financial-services/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/financial-services/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Security</title>
+      <link>http://localhost:59620/tags/security/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/security/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Web Development</title>
+      <link>http://localhost:59620/tags/web-development/</link>
+      <pubDate>Tue, 05 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/web-development/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Database</title>
+      <link>http://localhost:59620/tags/database/</link>
+      <pubDate>Sat, 02 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/database/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>MySQL</title>
+      <link>http://localhost:59620/tags/mysql/</link>
+      <pubDate>Sat, 02 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/mysql/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Facility Management</title>
+      <link>http://localhost:59620/tags/facility-management/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/facility-management/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Service Desk</title>
+      <link>http://localhost:59620/tags/service-desk/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/service-desk/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Vue.js</title>
+      <link>http://localhost:59620/tags/vue.js/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/vue.js/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Finance</title>
+      <link>http://localhost:59620/tags/finance/</link>
+      <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/finance/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Project Management</title>
+      <link>http://localhost:59620/tags/project-management/</link>
+      <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/project-management/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Enterprise</title>
+      <link>http://localhost:59620/tags/enterprise/</link>
+      <pubDate>Thu, 20 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/enterprise/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>React</title>
+      <link>http://localhost:59620/tags/react/</link>
+      <pubDate>Thu, 20 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/react/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>HRMS</title>
+      <link>http://localhost:59620/tags/hrms/</link>
+      <pubDate>Fri, 15 Mar 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/hrms/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Web Application</title>
+      <link>http://localhost:59620/tags/web-application/</link>
+      <pubDate>Fri, 15 Mar 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/web-application/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Backend</title>
+      <link>http://localhost:59620/tags/backend/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/backend/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Frontend</title>
+      <link>http://localhost:59620/tags/frontend/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/frontend/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Golang</title>
+      <link>http://localhost:59620/tags/golang/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/golang/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>JavaScript</title>
+      <link>http://localhost:59620/tags/javascript/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/javascript/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Microservices</title>
+      <link>http://localhost:59620/tags/microservices/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:59620/tags/microservices/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
